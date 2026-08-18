@@ -1,0 +1,193 @@
+{
+  "_说明": [
+    "P0 landmark 补充集合的**输入**：只有 PMID 与用于校验的期望值，不含任何摘要正文。",
+    "所以这个文件可以进公开仓库；取回来的摘要正文落在 data/landmark/entries.json（已 gitignore）。",
+    "",
+    "⚠ expect_* 三个字段是从 docs/medrag_改进任务清单.md 的种子清单表抄来的，**尚未经 efetch 证实**。",
+    "  它们的用途正是被证伪：landmark_构建集合.py --fetch 会把 efetch 返回的真实值与它们逐条比对，",
+    "  对不上就**跳过并报出来**，不静默接受，也不静默丢弃。",
+    "⚠ 只用 PMID 定位，**绝不用标题/缩写反查 PMID**：实测缩写撞名很严重——",
+    "  TOPCAT 撞上妇科肿瘤试验 Trial of Optimal Personalised Care After Treatment for Gynaecological cancer，",
+    "  ASCEND 撞上一堆 ascending aorta / ascending infection 的文章。",
+    "⚠ expect_title_contains 只是一个**辅助信号**，不是判据：写错了会把对的条目误判成错的，",
+    "  所以校验结果里三项分开报（期刊 / 年份 / 标题关键词），由人看着定，不由脚本替人拍板。",
+    "⚠ caveats 是人工写的引用注意事项（事后分析/阴性结果/同名多篇/获益与风险并存），会随条目一起进检索元数据，供生成侧提示。写错会误导，改动时要能说清依据。",
+    "⚠ aliases 是**该试验的事实性别名**（药物通用名 / 药理类别 / 人群简写），会拼进被向量化的 text 头部。加它的起因：PARAGON-HF 的标题写的是 Angiotensin-Neprilysin Inhibition，而临床医生问的是 sacubitril/valsartan 与 HFpEF，一个词都对不上——交叉编码器只给 0.41，而主库里一篇干细胞综述拿 0.99。⚠ 加别名会提高它被任意 query 拉进来的概率，**改完必须重跑 golden 确认代价仍≈0**，不能只看探针。",
+    "⚠ population 放在被向量化文本的**第一行**，这个位置是量出来的不是拍的。对照实验（HFpEF 题面）：现状 EMPEROR-Preserved 0.61 / DAPA-HF 0.40；把别名前置 → 0.86 / 0.74（对的错的一起抬，DAPA-HF 反而更容易混进来）；把人群前置 → 0.83 / 0.44（只抬对人群的，错人群的原地不动甚至下降）。**一个把正确答案和错误答案一起抬起来的改法不是改法。**⚠ 不写 LVEF 具体阈值：那是凭记忆写的数，本项目不许。人群名本身由标题即可核对。"
+  ],
+  "specialty": "cardiology",
+  "created": "2026-08-15",
+  "source": "docs/medrag_改进任务清单.md :: P0 心内科种子清单（10 篇）",
+  "entries": [
+    {
+      "trial_name": "EMPEROR-Preserved",
+      "pmid": "34449189",
+      "expect_journal": "N Engl J Med",
+      "expect_year": 2021,
+      "expect_title_contains": "Empagliflozin",
+      "topic": "HFpEF",
+      "aliases": [
+        "empagliflozin",
+        "SGLT2 inhibitor",
+        "sodium-glucose cotransporter 2 inhibitor",
+        "HFpEF",
+        "heart failure with preserved ejection fraction"
+      ],
+      "population": "HFpEF (heart failure with preserved ejection fraction)"
+    },
+    {
+      "trial_name": "DELIVER",
+      "pmid": "36027570",
+      "expect_journal": "N Engl J Med",
+      "expect_year": 2022,
+      "expect_title_contains": "Dapagliflozin",
+      "topic": "HFpEF/HFmrEF",
+      "aliases": [
+        "dapagliflozin",
+        "SGLT2 inhibitor",
+        "HFpEF",
+        "HFmrEF",
+        "heart failure with mildly reduced ejection fraction",
+        "heart failure with preserved ejection fraction"
+      ],
+      "population": "HFpEF/HFmrEF (heart failure with mildly reduced or preserved ejection fraction)"
+    },
+    {
+      "trial_name": "PARAGON-HF",
+      "pmid": "31475794",
+      "expect_journal": "N Engl J Med",
+      "expect_year": 2019,
+      "expect_title_contains": "Neprilysin",
+      "topic": "HFpEF",
+      "aliases": [
+        "sacubitril/valsartan",
+        "sacubitril valsartan",
+        "ARNI",
+        "angiotensin receptor-neprilysin inhibitor",
+        "HFpEF",
+        "heart failure with preserved ejection fraction"
+      ],
+      "population": "HFpEF (heart failure with preserved ejection fraction)"
+    },
+    {
+      "trial_name": "TOPCAT 主结果",
+      "pmid": "24716680",
+      "expect_journal": "N Engl J Med",
+      "expect_year": 2014,
+      "expect_title_contains": "Spironolactone",
+      "topic": "HFpEF",
+      "caveats": "主要复合终点未达统计学显著；引用时不要当成阳性结果",
+      "aliases": [
+        "spironolactone",
+        "mineralocorticoid receptor antagonist",
+        "MRA",
+        "aldosterone antagonist",
+        "HFpEF",
+        "heart failure with preserved ejection fraction"
+      ],
+      "population": "HFpEF (heart failure with preserved ejection fraction)"
+    },
+    {
+      "trial_name": "TOPCAT 区域差异",
+      "pmid": "25406305",
+      "expect_journal": "Circulation",
+      "expect_year": 2015,
+      "expect_title_contains": "Regional",
+      "topic": "HFpEF（事后区域分析）",
+      "caveats": "事后区域分析（post hoc），非预设；摘要里只有「≈4 倍事件率差异」这类描述性表述，HR 与 95%CI 在正文不在摘要",
+      "aliases": [
+        "spironolactone",
+        "TOPCAT",
+        "regional variation",
+        "Russia",
+        "Georgia",
+        "the Americas",
+        "HFpEF",
+        "post hoc analysis"
+      ],
+      "population": "HFpEF (heart failure with preserved ejection fraction), post hoc regional analysis"
+    },
+    {
+      "trial_name": "DAPA-HF",
+      "pmid": "31535829",
+      "expect_journal": "N Engl J Med",
+      "expect_year": 2019,
+      "expect_title_contains": "Dapagliflozin",
+      "topic": "HFrEF",
+      "aliases": [
+        "dapagliflozin",
+        "SGLT2 inhibitor",
+        "HFrEF",
+        "heart failure with reduced ejection fraction"
+      ],
+      "population": "HFrEF (heart failure with reduced ejection fraction)"
+    },
+    {
+      "trial_name": "EMPEROR-Reduced",
+      "pmid": "32865377",
+      "expect_journal": "N Engl J Med",
+      "expect_year": 2020,
+      "expect_title_contains": "Empagliflozin",
+      "topic": "HFrEF",
+      "aliases": [
+        "empagliflozin",
+        "SGLT2 inhibitor",
+        "HFrEF",
+        "heart failure with reduced ejection fraction"
+      ],
+      "population": "HFrEF (heart failure with reduced ejection fraction)"
+    },
+    {
+      "trial_name": "USPSTF 2022 阿司匹林一级预防",
+      "pmid": "35471505",
+      "expect_journal": "JAMA",
+      "expect_year": 2022,
+      "expect_title_contains": "Aspirin",
+      "topic": "阿司匹林一级预防（指南）",
+      "caveats": "指南/推荐声明，不是 RCT：摘要里没有 HR/95%CI/入组人数，要害信息是推荐等级与年龄分层",
+      "aliases": [
+        "aspirin",
+        "primary prevention",
+        "cardiovascular disease prevention",
+        "USPSTF",
+        "US Preventive Services Task Force",
+        "recommendation statement"
+      ],
+      "population": "adults without cardiovascular disease (primary prevention)"
+    },
+    {
+      "trial_name": "ASPREE",
+      "pmid": "30221595",
+      "expect_journal": "N Engl J Med",
+      "expect_year": 2018,
+      "expect_title_contains": "Aspirin",
+      "topic": "阿司匹林一级预防（老年）",
+      "caveats": "ASPREE 在 NEJM 2018 有三篇并列（全因死亡 / 心血管事件与出血 / 无残疾生存），本条是**全因死亡**那一篇（PMID 30221595）；问心血管终点时它未必是最合适的一篇",
+      "aliases": [
+        "aspirin",
+        "primary prevention",
+        "healthy older adults",
+        "elderly",
+        "cardiovascular disease prevention"
+      ],
+      "population": "healthy older adults without cardiovascular disease (primary prevention)"
+    },
+    {
+      "trial_name": "ASCEND",
+      "pmid": "30146931",
+      "expect_journal": "N Engl J Med",
+      "expect_year": 2018,
+      "expect_title_contains": "Aspirin",
+      "topic": "阿司匹林一级预防（糖尿病）",
+      "caveats": "糖尿病人群一级预防；主要疗效与主要出血终点方向相反，引用时必须同时给两侧",
+      "aliases": [
+        "aspirin",
+        "primary prevention",
+        "diabetes mellitus",
+        "type 2 diabetes",
+        "cardiovascular disease prevention"
+      ],
+      "population": "adults with diabetes without cardiovascular disease (primary prevention)"
+    }
+  ]
+}

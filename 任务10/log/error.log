@@ -1,0 +1,12 @@
+2026-08-11 15:08:38 WARNING [-] medrag.app: medrag-api v0.10.1 启动｜检索模式 live｜约束层 开｜并发上限 2｜鉴权 关
+2026-08-11 15:08:40 WARNING [-] medrag.app: 开始加载检索器（首次约 15.8GB 内存 + 数分钟）…
+2026-08-11 15:09:51 WARNING [-] medrag.app: 检索器就绪，用时 70.9s
+2026-08-11 15:09:51 WARNING [-] medrag.app: 生成流水线就绪，用时 73.4s（约束层 开）
+2026-08-11 15:09:54 WARNING [-] medrag.app: 预热：{'seconds': 76.07, 'pipeline_loaded': True, 'llm_warmup_seconds': 2.71, 'errors': []}
+2026-08-11 18:37:07 WARNING [-] medrag.app: medrag-api v0.10.1 启动｜检索模式 live｜约束层 开｜并发上限 2｜鉴权 关
+2026-08-11 18:37:09 WARNING [-] medrag.app: 开始加载检索器（首次约 15.8GB 内存 + 数分钟）…
+2026-08-11 18:37:51 WARNING [-] medrag.app: 检索器就绪，用时 41.5s
+2026-08-11 18:37:51 WARNING [-] medrag.app: 生成流水线就绪，用时 43.9s（约束层 开）
+2026-08-11 18:37:58 WARNING [-] medrag.app: 预热：{'seconds': 51.08, 'pipeline_loaded': True, 'llm_warmup_seconds': 7.14, 'errors': []}
+2026-08-11 18:49:57 WARNING [req-90038d70] medrag.error: APIError GET /api/v1/sessions/not-exist → [3002] 会话不存在或已过期 {'session_id': 'not-exist'}
+2026-08-11 18:50:45 WARNING [req-ddf65c5c] medrag.error: APIError GET /api/v1/sessions/not-exist → [3002] 会话不存在或已过期 {'session_id': 'not-exist'}

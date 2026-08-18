@@ -1,0 +1,687 @@
+生成流水线测试报告 · mode=ablation
+生成时间：2026-07-31 15:16:08
+用例 12 个
+
+================================================================================================
+[off-1·直接作答（对照基线）] 直接作答（对照基线）
+问题：What candidate genes have been associated with type 2 diabetes, and how strong is the evidence?
+期望：应给出带 [S#] 的结论，并说明关联强度的不确定性
+------------------------------------------------------------------------------------------------
+1. **直接回答**：  
+   Several candidate genes have been associated with type 2 diabetes, including *ABCC8*, *KCNJ11*, *SLC2A2*, *HNF4A*, *INS*, *INSR*, *PIK3R1*, and *SOS1* [S2]. The evidence for these associations comes primarily from candidate gene association studies in large, well-characterised populations [S2]. The strongest evidence to date is for a common amino acid variant in *PPARG* [S4].  
+
+2. **证据要点**：  
+   - *ABCC8*, *KCNJ11*, *SLC2A2*, *HNF4A*, and *INS* were found to significantly alter disease risk, with biologically consistent effects on relevant physiological traits in quantitative trait studies [S2].  
+   - *INSR*, *PIK3R1*, and *SOS1* showed significant associations with diabetes in a case-control study [S2].  
+   - A common amino acid variant in *PPARG* was found to confer significant protection against type 2 diabetes, based on a meta-analysis of multiple published studies [S4].  
+   - The *KCNJ11* E23K variant has been supported by multiple studies as a predisposing factor for type 2 diabetes [S4].  
+
+3. **不确定与空白**：  
+   - The role of *CAPN10* remains uncertain, as some studies support its association with type 2 diabetes, while others find no association or different alleles [S3][S4].  
+   - The evidence for most candidate genes is based on association studies rather than functional validation, and replication across different populations is often limited [S2][S4].  
+   - The study did not provide information on the exact mechanisms by which these genes influence type 2 diabetes, nor on the specific SNPs involved beyond the ones listed [S2][S4].
+
+## 参考文献
+[S1] Microarray Analysis PLoS Biology (2003). PMC212694 / PMID 14551912
+[S2] Candidate Gene Association Study in Type 2 Diabetes Indicates a Role for Genes Involved in β-Cell Function as Well as Insulin Action PLoS Biology (2003). PMC212698 / PMID 14551916
+[S3] Candidate Gene Association Study in Type 2 Diabetes Indicates a Role for Genes Involved in β-Cell Function as Well as Insulin Action PLoS Biology (2003). PMC212698 / PMID 14551916
+[S4] Candidate Gene Association Study in Type 2 Diabetes Indicates a Role for Genes Involved in β-Cell Function as Well as Insulin Action PLoS Biology (2003). PMC212698 / PMID 14551916
+
+> ⚠ 本回答由检索到的公开文献自动生成，仅供专业文献检索参考，不构成临床诊疗建议；具体用药与处置须由临床医师结合患者情况判断。
+------------------------------------------------------------------------------------------------
+耗时 6.897s | 调用 1 次 | 答案 2292 字 | 上下文 2045 tok
+分阶段耗时：{"context_assembly": 0.017, "answer_generator": 6.88, "postprocess": 0.001}
+阶段成功：  {"context_assembly": true, "evidence_evaluator": null, "answer_generator": true, "critical_reviewer": null, "final_assembler": null, "postprocess": true}
+引用：用了 ['S2', 'S3', 'S4'] / 可用 ['S1', 'S2', 'S3', 'S4'] / 编造 []
+出处清单：
+  [S1] PMC212694 | PLoS Biology (2003) | Fishing for Hypotheses | Microarray Analysis
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212694/
+  [S2] PMC212698 | PLoS Biology (2003) | Abstract | Candidate Gene Association Study in Type 2 Diabetes Indicates a Role for Genes Involved in β-Cell Function as Well as Insulin Action
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212698/
+  [S3] PMC212698 | PLoS Biology (2003) | Introduction | Candidate Gene Association Study in Type 2 Diabetes Indicates a Role for Genes Involved in β-Cell Function as Well as Insulin Action
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212698/
+  [S4] PMC212698 | PLoS Biology (2003) | Introduction | Candidate Gene Association Study in Type 2 Diabetes Indicates a Role for Genes Involved in β-Cell Function as Well as Insulin Action
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212698/
+
+================================================================================================
+[off-1·评估+作答] 评估+作答
+问题：What candidate genes have been associated with type 2 diabetes, and how strong is the evidence?
+期望：应给出带 [S#] 的结论，并说明关联强度的不确定性
+------------------------------------------------------------------------------------------------
+1. **直接回答**：  
+   Several candidate genes have been associated with type 2 diabetes, including ABCC8, KCNJ11, SLC2A2, HNF4A, and INS [S2]. The PPARG variant has also been linked to protection against type 2 diabetes [S4]. The evidence for these associations comes primarily from case-control studies and candidate gene association analyses [S2][S4].
+
+2. **证据要点**：  
+   - The study identified 5 genes (ABCC8, KCNJ11, SLC2A2, HNF4A, and INS) that significantly altered disease risk in a case-control study of 2,134 Caucasians [S2].  
+   - Three of these genes (ABCC8, KCNJ11, and INS) showed biologically consistent effects on relevant physiological traits in a quantitative trait study [S2].  
+   - The PPARG variant was found to confer significant protection against the development of type 2 diabetes, based on a meta-analysis of multiple studies [S4].  
+   - The CAPN10 gene has been associated with type 2 diabetes in some studies, but results are inconsistent across different studies [S3].
+
+3. **不确定与空白**：  
+   - The evidence for CAPN10's role in type 2 diabetes is conflicting, with some studies supporting its association and others finding no significant link [S3].  
+   - The study did not provide detailed information on the strength of association for all candidate genes, and only a subset of genes were examined [S2].  
+   - The role of other candidate genes, such as INSR, PIK3R1, and SOS1, was noted but not fully characterized in the provided evidence [S2].
+
+## 参考文献
+[S1] Microarray Analysis PLoS Biology (2003). PMC212694 / PMID 14551912
+[S2] Candidate Gene Association Study in Type 2 Diabetes Indicates a Role for Genes Involved in β-Cell Function as Well as Insulin Action PLoS Biology (2003). PMC212698 / PMID 14551916
+[S3] Candidate Gene Association Study in Type 2 Diabetes Indicates a Role for Genes Involved in β-Cell Function as Well as Insulin Action PLoS Biology (2003). PMC212698 / PMID 14551916
+[S4] Candidate Gene Association Study in Type 2 Diabetes Indicates a Role for Genes Involved in β-Cell Function as Well as Insulin Action PLoS Biology (2003). PMC212698 / PMID 14551916
+
+> ⚠ 本回答由检索到的公开文献自动生成，仅供专业文献检索参考，不构成临床诊疗建议；具体用药与处置须由临床医师结合患者情况判断。
+------------------------------------------------------------------------------------------------
+耗时 10.377s | 调用 2 次 | 答案 2175 字 | 上下文 2045 tok
+分阶段耗时：{"context_assembly": 0.015, "evidence_evaluator": 4.461, "answer_generator": 5.9, "postprocess": 0.0}
+阶段成功：  {"context_assembly": true, "evidence_evaluator": true, "answer_generator": true, "critical_reviewer": null, "final_assembler": null, "postprocess": true}
+引用：用了 ['S2', 'S3', 'S4'] / 可用 ['S1', 'S2', 'S3', 'S4'] / 编造 []
+出处清单：
+  [S1] PMC212694 | PLoS Biology (2003) | Fishing for Hypotheses | Microarray Analysis
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212694/
+  [S2] PMC212698 | PLoS Biology (2003) | Abstract | Candidate Gene Association Study in Type 2 Diabetes Indicates a Role for Genes Involved in β-Cell Function as Well as Insulin Action
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212698/
+  [S3] PMC212698 | PLoS Biology (2003) | Introduction | Candidate Gene Association Study in Type 2 Diabetes Indicates a Role for Genes Involved in β-Cell Function as Well as Insulin Action
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212698/
+  [S4] PMC212698 | PLoS Biology (2003) | Introduction | Candidate Gene Association Study in Type 2 Diabetes Indicates a Role for Genes Involved in β-Cell Function as Well as Insulin Action
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212698/
+
+================================================================================================
+[off-1·完整四段链] 完整四段链
+问题：What candidate genes have been associated with type 2 diabetes, and how strong is the evidence?
+期望：应给出带 [S#] 的结论，并说明关联强度的不确定性
+------------------------------------------------------------------------------------------------
+## 回答
+Several candidate genes have been associated with type 2 diabetes, including polymorphisms in five of 15 genes [S2]. A meta-analysis found that a PPARG variant confers significant protection against type 2 diabetes [S4].  
+
+## 证据要点
+- A candidate gene association study identified polymorphisms in five of 15 genes that significantly altered disease risk in a case-control study of 2,134 Caucasians [S2].  
+- Three genes showed biologically consistent effects on relevant physiological traits in a quantitative trait study [S2].  
+- A meta-analysis of multiple studies found that a PPARG variant confers significant protection against type 2 diabetes [S4].  
+- CAPN10 has been implicated in some studies, with inconsistent results across different studies [S3].  
+- INSR, PIK3R1, and SOS1 were mentioned but not elaborated on in the text [S2].  
+
+## 证据强度与一致性
+The evidence is primarily based on case-control studies and meta-analyses [S2][S4]. While some associations are supported by multiple studies, others, such as CAPN10, show inconsistent results across studies [S3]. The findings suggest that common variants in genes influencing β-cell function may contribute to the inherited component of type 2 diabetes [S2].  
+
+## 局限与提示
+The study did not provide detailed information on the strength of association for each gene, such as odds ratios or p-values [S2]. The role of other candidate genes, such as INSR, PIK3R1, and SOS1, remains unclear [S2]. The evidence is limited to Caucasian populations and may not apply to other ethnic groups. Clinical interpretation of these associations should be done by a healthcare professional, as genetic factors are complex and may interact with environmental and lifestyle factors.  
+
+## 参考文献
+[S1] Microarray Analysis PLoS Biology (2003). PMC212694 / PMID 14551912  
+[S2] Candidate Gene Association Study in Type 2 Diabetes Indicates a Role for Genes Involved in β-Cell Function as Well as Insulin Action PLoS Biology (2003). PMC212698 / PMID 14551916  
+[S3] Candidate Gene Association Study in Type 2 Diabetes Indicates a Role for Genes Involved in β-Cell Function as Well as Insulin Action PLoS Biology (2003). PMC212698 / PMID 14551916  
+[S4] Candidate Gene Association Study in Type 2 Diabetes Indicates a Role for Genes Involved in β-Cell Function as Well as Insulin Action PLoS Biology (2003). PMC212698 / PMID 14551916
+
+> ⚠ 本回答由检索到的公开文献自动生成，仅供专业文献检索参考，不构成临床诊疗建议；具体用药与处置须由临床医师结合患者情况判断。
+------------------------------------------------------------------------------------------------
+耗时 31.066s | 调用 4 次 | 答案 2437 字 | 上下文 2045 tok
+分阶段耗时：{"context_assembly": 0.015, "evidence_evaluator": 4.431, "answer_generator": 6.029, "critical_reviewer": 11.915, "final_assembler": 8.676, "postprocess": 0.001}
+阶段成功：  {"context_assembly": true, "evidence_evaluator": true, "answer_generator": true, "critical_reviewer": true, "final_assembler": true, "postprocess": true}
+引用：用了 ['S1', 'S2', 'S3', 'S4'] / 可用 ['S1', 'S2', 'S3', 'S4'] / 编造 []
+出处清单：
+  [S1] PMC212694 | PLoS Biology (2003) | Fishing for Hypotheses | Microarray Analysis
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212694/
+  [S2] PMC212698 | PLoS Biology (2003) | Abstract | Candidate Gene Association Study in Type 2 Diabetes Indicates a Role for Genes Involved in β-Cell Function as Well as Insulin Action
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212698/
+  [S3] PMC212698 | PLoS Biology (2003) | Introduction | Candidate Gene Association Study in Type 2 Diabetes Indicates a Role for Genes Involved in β-Cell Function as Well as Insulin Action
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212698/
+  [S4] PMC212698 | PLoS Biology (2003) | Introduction | Candidate Gene Association Study in Type 2 Diabetes Indicates a Role for Genes Involved in β-Cell Function as Well as Insulin Action
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212698/
+
+================================================================================================
+[off-2·直接作答（对照基线）] 直接作答（对照基线）
+问题：How do bacteria control chemotaxis, and what makes the network robust?
+期望：应基于证据描述机制，不得引入语料外的通路名
+------------------------------------------------------------------------------------------------
+1. **直接回答**：Bacteria control chemotaxis through a network of interacting proteins that regulate flagellar motor direction in response to environmental signals [S2][S5]。The network is robust due to conserved core control strategies and additional feedback loops in some species like *Bacillus subtilis* [S1]。These feedback loops provide an extra layer of regulation and robustness [S1]。
+
+2. **证据要点**：
+- Bacteria use a network of proteins to sense chemical gradients and adjust their movement by altering the frequency of flagellar rotation (runs and tumbles) [S2][S5]。
+- The core control strategy for signal processing is conserved between *E. coli* and *B. subtilis*, though *B. subtilis* has two additional feedback loops that enhance robustness [S1]。
+- Despite homologous genes, the contribution of orthologs to network function differs between species, as shown by gene deletion experiments [S5]。
+- Sensory adaptation involves memory-like mechanisms that allow bacteria to compare current and past environments [S2]。
+
+3. **不确定与空白**：
+- 证据未明确说明不同反馈回路的具体机制或其在其他细菌物种中的普遍性。
+- 未提供关于网络鲁棒性的定量分析或具体参数。
+- 未提及其他非 *E. coli* 和 *B. subtilis* 的细菌是否也具有类似的反馈回路结构。
+
+## 参考文献
+[S1] Design and Diversity in Bacterial Chemotaxis: A Comparative Study in  Escherichia coli  and  Bacillus subtilis PLoS Biology (2004). PMC340952 / PMID 14966542
+[S2] Design and Diversity in Bacterial Chemotaxis: A Comparative Study in  Escherichia coli  and  Bacillus subtilis PLoS Biology (2004). PMC340952 / PMID 14966542
+[S3] Comparing the Networks that Power Bacterial Chemotaxis PLoS Biology (2004). PMC340964
+[S4] Circulation and Chemotaxis of Fetal Hematopoietic Stem Cells PLoS Biology (2004). PMC368169 / PMID 15024423
+[S5] Design and Diversity in Bacterial Chemotaxis: A Comparative Study in  Escherichia coli  and  Bacillus subtilis PLoS Biology (2004). PMC340952 / PMID 14966542
+
+> ⚠ 本回答由检索到的公开文献自动生成，仅供专业文献检索参考，不构成临床诊疗建议；具体用药与处置须由临床医师结合患者情况判断。
+------------------------------------------------------------------------------------------------
+耗时 5.619s | 调用 1 次 | 答案 1917 字 | 上下文 2330 tok
+分阶段耗时：{"context_assembly": 0.018, "answer_generator": 5.601, "postprocess": 0.0}
+阶段成功：  {"context_assembly": true, "evidence_evaluator": null, "answer_generator": true, "critical_reviewer": null, "final_assembler": null, "postprocess": true}
+引用：用了 ['S1', 'S2', 'S5'] / 可用 ['S1', 'S2', 'S3', 'S4', 'S5'] / 编造 []
+出处清单：
+  [S1] PMC340952 | PLoS Biology (2004) | Abstract | Design and Diversity in Bacterial Chemotaxis: A Comparative Study in  Escherichia coli  and  Bacillus subtilis
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC340952/
+  [S2] PMC340952 | PLoS Biology (2004) | Introduction | Design and Diversity in Bacterial Chemotaxis: A Comparative Study in  Escherichia coli  and  Bacillus subtilis
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC340952/
+  [S3] PMC340964 | PLoS Biology (2004) | (no-section) | Comparing the Networks that Power Bacterial Chemotaxis
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC340964/
+  [S4] PMC368169 | PLoS Biology (2004) | Results | Circulation and Chemotaxis of Fetal Hematopoietic Stem Cells
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC368169/
+  [S5] PMC340952 | PLoS Biology (2004) | Introduction | Design and Diversity in Bacterial Chemotaxis: A Comparative Study in  Escherichia coli  and  Bacillus subtilis
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC340952/
+
+================================================================================================
+[off-2·评估+作答] 评估+作答
+问题：How do bacteria control chemotaxis, and what makes the network robust?
+期望：应基于证据描述机制，不得引入语料外的通路名
+------------------------------------------------------------------------------------------------
+1. **直接回答**：Bacteria control chemotaxis through a network of interacting proteins that regulate flagellar motor direction in response to environmental signals [S2], and the network's robustness is achieved through additional feedback loops in *B. subtilis* [S1]. These feedback loops provide an extra layer of regulation and stability [S1]. The core control strategy for signal processing is conserved across species, though the specific network structures differ [S1].
+
+2. **证据要点**：
+   - Bacteria use a network of proteins to regulate flagellar motor direction, which determines whether the cell runs or tumbles in response to attractants or repellents [S2].
+   - In *E. coli* and *B. subtilis*, the core control strategy for signal processing is conserved, but *B. subtilis* has two additional feedback loops that enhance robustness [S1].
+   - The basic mechanism involves receptor-mediated phosphorylation of CheY, which alters flagellar motor spin direction [S2].
+   - Despite homologous genes, the functional contributions of orthologs differ between species, leading to distinct network behaviors [S5].
+   - Sensory adaptation allows bacteria to compare current and past environments, enabling them to adjust movement in response to chemical gradients [S2].
+
+3. **不确定与空白**：
+   - The specific molecular details of how the feedback loops in *B. subtilis* contribute to robustness are not fully described in the provided evidence.
+   - The exact mechanisms by which different pathway components in various bacteria (e.g., *H. pylori*, *M. xanthus*) regulate chemotaxis remain unclear [S2].
+   - The evidence does not specify the exact nature of the differences in network structures between species, only that they are distinct [S1].
+
+## 参考文献
+[S1] Design and Diversity in Bacterial Chemotaxis: A Comparative Study in  Escherichia coli  and  Bacillus subtilis PLoS Biology (2004). PMC340952 / PMID 14966542
+[S2] Design and Diversity in Bacterial Chemotaxis: A Comparative Study in  Escherichia coli  and  Bacillus subtilis PLoS Biology (2004). PMC340952 / PMID 14966542
+[S3] Comparing the Networks that Power Bacterial Chemotaxis PLoS Biology (2004). PMC340964
+[S4] Circulation and Chemotaxis of Fetal Hematopoietic Stem Cells PLoS Biology (2004). PMC368169 / PMID 15024423
+[S5] Design and Diversity in Bacterial Chemotaxis: A Comparative Study in  Escherichia coli  and  Bacillus subtilis PLoS Biology (2004). PMC340952 / PMID 14966542
+
+> ⚠ 本回答由检索到的公开文献自动生成，仅供专业文献检索参考，不构成临床诊疗建议；具体用药与处置须由临床医师结合患者情况判断。
+------------------------------------------------------------------------------------------------
+耗时 15.403s | 调用 2 次 | 答案 2504 字 | 上下文 2330 tok
+分阶段耗时：{"context_assembly": 0.018, "evidence_evaluator": 9.444, "answer_generator": 5.942, "postprocess": 0.0}
+阶段成功：  {"context_assembly": true, "evidence_evaluator": false, "answer_generator": true, "critical_reviewer": null, "final_assembler": null, "postprocess": true}
+引用：用了 ['S1', 'S2', 'S5'] / 可用 ['S1', 'S2', 'S3', 'S4', 'S5'] / 编造 []
+出处清单：
+  [S1] PMC340952 | PLoS Biology (2004) | Abstract | Design and Diversity in Bacterial Chemotaxis: A Comparative Study in  Escherichia coli  and  Bacillus subtilis
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC340952/
+  [S2] PMC340952 | PLoS Biology (2004) | Introduction | Design and Diversity in Bacterial Chemotaxis: A Comparative Study in  Escherichia coli  and  Bacillus subtilis
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC340952/
+  [S3] PMC340964 | PLoS Biology (2004) | (no-section) | Comparing the Networks that Power Bacterial Chemotaxis
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC340964/
+  [S4] PMC368169 | PLoS Biology (2004) | Results | Circulation and Chemotaxis of Fetal Hematopoietic Stem Cells
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC368169/
+  [S5] PMC340952 | PLoS Biology (2004) | Introduction | Design and Diversity in Bacterial Chemotaxis: A Comparative Study in  Escherichia coli  and  Bacillus subtilis
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC340952/
+
+================================================================================================
+[off-2·完整四段链] 完整四段链
+问题：How do bacteria control chemotaxis, and what makes the network robust?
+期望：应基于证据描述机制，不得引入语料外的通路名
+------------------------------------------------------------------------------------------------
+## 回答
+Bacteria control chemotaxis through a network of interacting proteins that regulate flagellar motor direction in response to environmental signals [S2]. *Bacillus subtilis* has additional feedback loops that provide an additional layer of regulation, which may contribute to robustness in its chemotaxis network [S1].  
+
+## 证据要点
+- The basic mechanism involves receptor-mediated phosphorylation of CheY, which binds to the flagellar motor and changes its spin direction [S2].  
+- *E. coli* and *B. subtilis* share orthologous proteins but differ in how these proteins contribute to network function, with *B. subtilis* having two additional feedback loops for regulation [S1][S5].  
+- Sensory adaptation involves a rudimentary form of memory that allows bacteria to compare their current and past environments [S2].  
+- The core control strategy for signal processing is conserved across species, though network structures differ [S1][S3].  
+
+## 证据强度与一致性
+证据主要来自比较研究和模型分析（2004年），表明核心控制策略在不同物种中具有保守性，但具体网络结构和反馈机制的细节存在差异。研究结果在整体上一致，但未提供关于网络鲁棒性的具体量化数据或实验验证。  
+
+## 局限与提示
+- 证据未明确说明具体反馈回路的分子机制或其在不同物种中的具体作用 [S1]。  
+- 未提及其他非 *E. coli* 和 *B. subtilis* 的细菌是否也具有类似的反馈回路或网络结构 [S1][S5]。  
+- 未提供关于网络鲁棒性的具体量化数据或实验验证 [S1]。  
+- 涉及具体反馈回路或调控机制时，需由临床或分子生物学家结合具体实验进一步验证。  
+
+## 参考文献
+[S1] Design and Diversity in Bacterial Chemotaxis: A Comparative Study in  Escherichia coli  and  Bacillus subtilis PLoS Biology (2004). PMC340952 / PMID 14966542  
+[S2] Design and Diversity in Bacterial Chemotaxis: A Comparative Study in  Escherichia coli  and  Bacillus subtilis PLoS Biology (2004). PMC340952 / PMID 14966542  
+[S3] Comparing the Networks that Power Bacterial Chemotaxis PLoS Biology (2004). PMC340964  
+[S4] Circulation and Chemotaxis of Fetal Hematopoietic Stem Cells PLoS Biology (2004). PMC368169 / PMID 15024423  
+[S5] Design and Diversity in Bacterial Chemotaxis: A Comparative Study in  Escherichia coli  and  Bacillus subtilis PLoS Biology (2004). PMC340952 / PMID 14966542
+
+> ⚠ 本回答由检索到的公开文献自动生成，仅供专业文献检索参考，不构成临床诊疗建议；具体用药与处置须由临床医师结合患者情况判断。
+------------------------------------------------------------------------------------------------
+耗时 35.815s | 调用 4 次 | 答案 2032 字 | 上下文 2330 tok
+分阶段耗时：{"context_assembly": 0.017, "evidence_evaluator": 9.415, "answer_generator": 5.553, "critical_reviewer": 11.119, "final_assembler": 9.71, "postprocess": 0.0}
+阶段成功：  {"context_assembly": true, "evidence_evaluator": false, "answer_generator": true, "critical_reviewer": true, "final_assembler": true, "postprocess": true}
+引用：用了 ['S1', 'S2', 'S3', 'S4', 'S5'] / 可用 ['S1', 'S2', 'S3', 'S4', 'S5'] / 编造 []
+出处清单：
+  [S1] PMC340952 | PLoS Biology (2004) | Abstract | Design and Diversity in Bacterial Chemotaxis: A Comparative Study in  Escherichia coli  and  Bacillus subtilis
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC340952/
+  [S2] PMC340952 | PLoS Biology (2004) | Introduction | Design and Diversity in Bacterial Chemotaxis: A Comparative Study in  Escherichia coli  and  Bacillus subtilis
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC340952/
+  [S3] PMC340964 | PLoS Biology (2004) | (no-section) | Comparing the Networks that Power Bacterial Chemotaxis
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC340964/
+  [S4] PMC368169 | PLoS Biology (2004) | Results | Circulation and Chemotaxis of Fetal Hematopoietic Stem Cells
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC368169/
+  [S5] PMC340952 | PLoS Biology (2004) | Introduction | Design and Diversity in Bacterial Chemotaxis: A Comparative Study in  Escherichia coli  and  Bacillus subtilis
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC340952/
+
+================================================================================================
+[off-3·直接作答（对照基线）] 直接作答（对照基线）
+问题：Can gene expression data be used to predict patient survival? What methods were evaluated?
+期望：应点明方法名与其局限
+------------------------------------------------------------------------------------------------
+1. **直接回答**：  
+   Gene expression data can be used to predict patient survival [S1]. Methods evaluated include the use of gene expression profiles to define subtypes of diseases and correlate with clinical outcomes [S1].
+
+2. **证据要点**：  
+   - Alizadeh et al. (2000) demonstrated that gene expression profiles can define subtypes of diffuse large B-cell lymphomas, which strongly correlate with long-term survival [S1].  
+   - van't Veer et al. (2002) also contributed to this field by showing that gene expression profiling can predict clinical outcomes in breast cancer [S1].  
+   - These studies represent early applications of gene expression data in clinical prediction, though specific methods such as survival analysis models or classification algorithms are not detailed in the provided text [S1].
+
+3. **不确定与空白**：  
+   - The specific methods evaluated (e.g., survival analysis, classification algorithms, or machine learning techniques) are not explicitly described in the provided evidence [S1].  
+   - No details are given about the statistical models or validation approaches used in these studies [S1].  
+   - The evidence does not mention any comparative evaluation of different methods or their relative effectiveness [S1].
+
+## 参考文献
+[S1] Microarray Analysis PLoS Biology (2003). PMC212694 / PMID 14551912
+[S2] Digital Evolution PLoS Biology (2003). PMC212697 / PMID 14551915
+[S3] Developmental Origin and Evolution of Bacteriocytes in the Aphid– Buchnera  Symbiosis PLoS Biology (2003). PMC212699 / PMID 14551917
+[S4] Developmental Origins and Evolution of  Buchnera  Host Cells PLoS Biology (2003). PMC212700
+[S5] In Methuselah's Mould PLoS Biology (2004). PMC322746 / PMID 14758367
+
+> ⚠ 本回答由检索到的公开文献自动生成，仅供专业文献检索参考，不构成临床诊疗建议；具体用药与处置须由临床医师结合患者情况判断。
+------------------------------------------------------------------------------------------------
+耗时 5.58s | 调用 1 次 | 答案 1761 字 | 上下文 2391 tok
+分阶段耗时：{"context_assembly": 0.05, "answer_generator": 5.53, "postprocess": 0.0}
+阶段成功：  {"context_assembly": true, "evidence_evaluator": null, "answer_generator": true, "critical_reviewer": null, "final_assembler": null, "postprocess": true}
+引用：用了 ['S1'] / 可用 ['S1', 'S2', 'S3', 'S4', 'S5'] / 编造 []
+出处清单：
+  [S1] PMC212694 | PLoS Biology (2003) | Fishing for Hypotheses | Microarray Analysis
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212694/
+  [S2] PMC212697 | PLoS Biology (2003) | Evolution in Action | Digital Evolution
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212697/
+  [S3] PMC212699 | PLoS Biology (2003) | Introduction | Developmental Origin and Evolution of Bacteriocytes in the Aphid– Buchnera  Symbiosis
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212699/
+  [S4] PMC212700 | PLoS Biology (2003) | (no-section) | Developmental Origins and Evolution of  Buchnera  Host Cells
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212700/
+  [S5] PMC322746 | PLoS Biology (2004) | Extending Life | In Methuselah's Mould
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC322746/
+
+================================================================================================
+[off-3·评估+作答] 评估+作答
+问题：Can gene expression data be used to predict patient survival? What methods were evaluated?
+期望：应点明方法名与其局限
+------------------------------------------------------------------------------------------------
+1. **直接回答**：Gene expression data can be used to predict patient survival [S1]. Methods evaluated include the use of gene expression profiles to define subtypes of diseases and predict long-term survival [S1].
+
+2. **证据要点**：
+   - Gene expression profiles can provide a strong indicator of long-term survival in diffuse large B-cell lymphomas [S1].
+   - The study by Alizadeh et al. (2000) demonstrated that gene expression profiles can define subtypes of cancer with distinct clinical outcomes [S1].
+   - The text mentions the potential for clinical applications of gene expression profiling in complex diseases, including cancer, diabetes, aging, and response to toxins [S1].
+
+3. **不确定与空白**：现有证据未明确说明具体使用了哪些预测方法（如生存分析模型、机器学习算法等），也未提供其他疾病类型的预测方法细节。此外，未提及具体的研究设计、样本量或统计方法。
+
+## 参考文献
+[S1] Microarray Analysis PLoS Biology (2003). PMC212694 / PMID 14551912
+[S2] Digital Evolution PLoS Biology (2003). PMC212697 / PMID 14551915
+[S3] Developmental Origin and Evolution of Bacteriocytes in the Aphid– Buchnera  Symbiosis PLoS Biology (2003). PMC212699 / PMID 14551917
+[S4] Developmental Origins and Evolution of  Buchnera  Host Cells PLoS Biology (2003). PMC212700
+[S5] In Methuselah's Mould PLoS Biology (2004). PMC322746 / PMID 14758367
+
+> ⚠ 本回答由检索到的公开文献自动生成，仅供专业文献检索参考，不构成临床诊疗建议；具体用药与处置须由临床医师结合患者情况判断。
+------------------------------------------------------------------------------------------------
+耗时 8.451s | 调用 2 次 | 答案 1295 字 | 上下文 2391 tok
+分阶段耗时：{"context_assembly": 0.045, "evidence_evaluator": 4.141, "answer_generator": 4.265, "postprocess": 0.0}
+阶段成功：  {"context_assembly": true, "evidence_evaluator": true, "answer_generator": true, "critical_reviewer": null, "final_assembler": null, "postprocess": true}
+引用：用了 ['S1'] / 可用 ['S1', 'S2', 'S3', 'S4', 'S5'] / 编造 []
+出处清单：
+  [S1] PMC212694 | PLoS Biology (2003) | Fishing for Hypotheses | Microarray Analysis
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212694/
+  [S2] PMC212697 | PLoS Biology (2003) | Evolution in Action | Digital Evolution
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212697/
+  [S3] PMC212699 | PLoS Biology (2003) | Introduction | Developmental Origin and Evolution of Bacteriocytes in the Aphid– Buchnera  Symbiosis
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212699/
+  [S4] PMC212700 | PLoS Biology (2003) | (no-section) | Developmental Origins and Evolution of  Buchnera  Host Cells
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212700/
+  [S5] PMC322746 | PLoS Biology (2004) | Extending Life | In Methuselah's Mould
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC322746/
+
+================================================================================================
+[off-3·完整四段链] 完整四段链
+问题：Can gene expression data be used to predict patient survival? What methods were evaluated?
+期望：应点明方法名与其局限
+------------------------------------------------------------------------------------------------
+## 回答
+Gene expression data may have potential for predicting patient survival, as suggested by some studies [S1]. The text discusses the potential applications of gene expression profiling in predicting survival, but does not specify the methods used for evaluation [S1].
+
+## 证据要点
+- The text mentions that Alizadeh et al. (2000) demonstrated that diffuse large B-cell lymphomas have two major subtypes defined by molecular profiles [S1].  
+- The text mentions the potential for clinical applications of gene expression profiling in complex diseases such as cancer, diabetes, aging, and response to toxins [S1].  
+
+## 证据强度与一致性
+证据主要基于文献综述，未提供具体研究的详细方法或结果。文本中提到的潜在应用为推测性质，未明确指出其已被验证或评估。证据之间在主题上具有一致性，但缺乏具体研究的细节和验证信息。
+
+## 局限与提示
+现有证据未明确说明具体使用了哪些预测模型或算法，也未提供关于方法评估的具体细节，如敏感性、特异性或验证集的信息。此外，未提及是否进行了多中心验证或外部数据集的测试。涉及具体用药、剂量或个体化处置时，需由临床医师结合患者情况判断。
+
+## 参考文献
+[S1] Microarray Analysis PLoS Biology (2003). PMC212694 / PMID 14551912  
+[S2] Digital Evolution PLoS Biology (2003). PMC212697 / PMID 14551915  
+[S3] Developmental Origin and Evolution of Bacteriocytes in the Aphid– Buchnera  Symbiosis PLoS Biology (2003). PMC212699 / PMID 14551917  
+[S4] Developmental Origins and Evolution of  Buchnera  Host Cells PLoS Biology (2003). PMC212700  
+[S5] In Methuselah's Mould PLoS Biology (2004). PMC322746 / PMID 14758367
+
+> ⚠ 本回答由检索到的公开文献自动生成，仅供专业文献检索参考，不构成临床诊疗建议；具体用药与处置须由临床医师结合患者情况判断。
+------------------------------------------------------------------------------------------------
+耗时 25.555s | 调用 4 次 | 答案 1372 字 | 上下文 2391 tok
+分阶段耗时：{"context_assembly": 0.046, "evidence_evaluator": 4.109, "answer_generator": 4.389, "critical_reviewer": 9.943, "final_assembler": 7.068, "postprocess": 0.0}
+阶段成功：  {"context_assembly": true, "evidence_evaluator": true, "answer_generator": true, "critical_reviewer": true, "final_assembler": true, "postprocess": true}
+引用：用了 ['S1', 'S2', 'S3', 'S4', 'S5'] / 可用 ['S1', 'S2', 'S3', 'S4', 'S5'] / 编造 []
+出处清单：
+  [S1] PMC212694 | PLoS Biology (2003) | Fishing for Hypotheses | Microarray Analysis
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212694/
+  [S2] PMC212697 | PLoS Biology (2003) | Evolution in Action | Digital Evolution
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212697/
+  [S3] PMC212699 | PLoS Biology (2003) | Introduction | Developmental Origin and Evolution of Bacteriocytes in the Aphid– Buchnera  Symbiosis
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212699/
+  [S4] PMC212700 | PLoS Biology (2003) | (no-section) | Developmental Origins and Evolution of  Buchnera  Host Cells
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212700/
+  [S5] PMC322746 | PLoS Biology (2004) | Extending Life | In Methuselah's Mould
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC322746/
+
+================================================================================================
+[off-4·直接作答（对照基线）] 直接作答（对照基线）
+问题：What is the recommended starting dose of pembrolizumab for non-small cell lung cancer in 2024 guidelines?
+期望：语料里没有该药与该指南，应明确说证据不足、不得编造剂量
+------------------------------------------------------------------------------------------------
+1. **直接回答**：现有证据不足以回答 pembrolizumab 在 2024 年指南中的推荐起始剂量 [S1][S2][S3][S4][S5]。
+
+2. **证据要点**：
+   - 所有提供的文献均来自 2003 年的 PLoS Biology 杂志，内容涉及基因表达分析、V(D)J 重组、神经网络研究、糖尿病相关基因关联以及蚜虫与共生菌的发育关系，均未涉及 pembrolizumab 的剂量推荐或肺癌治疗指南 [S1][S2][S3][S4][S5]。
+   - 文献中未提及任何关于非小细胞肺癌（NSCLC）的治疗方案、药物剂量或 2024 年的临床指南内容 [S1][S2][S3][S4][S5]。
+
+3. **不确定与空白**：
+   - 本系统提供的证据均未覆盖 pembrolizumab 在非小细胞肺癌中的推荐起始剂量，也未提及 2024 年的临床指南内容。
+   - 因此，无法基于现有证据回答该问题，建议查阅最新的临床指南或相关药物说明书以获取准确信息。
+
+## 参考文献
+[S1] Microarray Analysis PLoS Biology (2003). PMC212694 / PMID 14551912
+[S2] V(D)J Recombination and the Evolution of the Adaptive Immune System PLoS Biology (2003). PMC212695 / PMID 14551913
+[S3] Neuroscience Networks PLoS Biology (2003). PMC212696 / PMID 14551914
+[S4] Candidate Gene Association Study in Type 2 Diabetes Indicates a Role for Genes Involved in β-Cell Function as Well as Insulin Action PLoS Biology (2003). PMC212698 / PMID 14551916
+[S5] Developmental Origin and Evolution of Bacteriocytes in the Aphid– Buchnera  Symbiosis PLoS Biology (2003). PMC212699 / PMID 14551917
+
+> ⚠ 本回答由检索到的公开文献自动生成，仅供专业文献检索参考，不构成临床诊疗建议；具体用药与处置须由临床医师结合患者情况判断。
+------------------------------------------------------------------------------------------------
+耗时 5.12s | 调用 1 次 | 答案 1108 字 | 上下文 2362 tok
+分阶段耗时：{"context_assembly": 0.042, "answer_generator": 5.078, "postprocess": 0.0}
+阶段成功：  {"context_assembly": true, "evidence_evaluator": null, "answer_generator": true, "critical_reviewer": null, "final_assembler": null, "postprocess": true}
+引用：用了 ['S1', 'S2', 'S3', 'S4', 'S5'] / 可用 ['S1', 'S2', 'S3', 'S4', 'S5'] / 编造 []
+出处清单：
+  [S1] PMC212694 | PLoS Biology (2003) | Fundamental Microarray Technology | Microarray Analysis
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212694/
+  [S2] PMC212695 | PLoS Biology (2003) | V(D)J Recombination: A Cut-and-Paste Reaction | V(D)J Recombination and the Evolution of the Adaptive Immune System
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212695/
+  [S3] PMC212696 | PLoS Biology (2003) | (no-section) | Neuroscience Networks
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212696/
+  [S4] PMC212698 | PLoS Biology (2003) | Results/Discussion | Candidate Gene Association Study in Type 2 Diabetes Indicates a Role for Genes Involved in β-Cell Function as Well as Insulin Action
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212698/
+  [S5] PMC212699 | PLoS Biology (2003) | Results | Developmental Origin and Evolution of Bacteriocytes in the Aphid– Buchnera  Symbiosis
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212699/
+
+================================================================================================
+[off-4·评估+作答] 评估+作答
+问题：What is the recommended starting dose of pembrolizumab for non-small cell lung cancer in 2024 guidelines?
+期望：语料里没有该药与该指南，应明确说证据不足、不得编造剂量
+------------------------------------------------------------------------------------------------
+1. **直接回答**：现有证据不足以回答 pembrolizumab 在 2024 年指南中的推荐起始剂量 [S1][S2][S3][S4][S5]。
+
+2. **证据要点**：  
+   - 所有提供的文献均未涉及 pembrolizumab 的剂量推荐，也未提及非小细胞肺癌（NSCLC）的治疗指南 [S1][S2][S3][S4][S5]。  
+   - 文献内容主要集中在基因表达分析、免疫系统重组、神经网络研究、糖尿病相关基因以及蚜虫共生体发育等领域，与 pembrolizumab 的临床应用无关 [S1][S2][S3][S4][S5]。
+
+3. **不确定与空白**：  
+   - 证据中未包含任何关于 pembrolizumab 的剂量信息，也未提及 2024 年的临床指南内容。  
+   - 因此，无法基于现有证据推断 pembrolizumab 在非小细胞肺癌中的推荐起始剂量。
+
+## 参考文献
+[S1] Microarray Analysis PLoS Biology (2003). PMC212694 / PMID 14551912
+[S2] V(D)J Recombination and the Evolution of the Adaptive Immune System PLoS Biology (2003). PMC212695 / PMID 14551913
+[S3] Neuroscience Networks PLoS Biology (2003). PMC212696 / PMID 14551914
+[S4] Candidate Gene Association Study in Type 2 Diabetes Indicates a Role for Genes Involved in β-Cell Function as Well as Insulin Action PLoS Biology (2003). PMC212698 / PMID 14551916
+[S5] Developmental Origin and Evolution of Bacteriocytes in the Aphid– Buchnera  Symbiosis PLoS Biology (2003). PMC212699 / PMID 14551917
+
+> ⚠ 本回答由检索到的公开文献自动生成，仅供专业文献检索参考，不构成临床诊疗建议；具体用药与处置须由临床医师结合患者情况判断。
+------------------------------------------------------------------------------------------------
+耗时 9.08s | 调用 2 次 | 答案 1067 字 | 上下文 2362 tok
+分阶段耗时：{"context_assembly": 0.043, "evidence_evaluator": 4.347, "answer_generator": 4.69, "postprocess": 0.0}
+阶段成功：  {"context_assembly": true, "evidence_evaluator": true, "answer_generator": true, "critical_reviewer": null, "final_assembler": null, "postprocess": true}
+引用：用了 ['S1', 'S2', 'S3', 'S4', 'S5'] / 可用 ['S1', 'S2', 'S3', 'S4', 'S5'] / 编造 []
+出处清单：
+  [S1] PMC212694 | PLoS Biology (2003) | Fundamental Microarray Technology | Microarray Analysis
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212694/
+  [S2] PMC212695 | PLoS Biology (2003) | V(D)J Recombination: A Cut-and-Paste Reaction | V(D)J Recombination and the Evolution of the Adaptive Immune System
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212695/
+  [S3] PMC212696 | PLoS Biology (2003) | (no-section) | Neuroscience Networks
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212696/
+  [S4] PMC212698 | PLoS Biology (2003) | Results/Discussion | Candidate Gene Association Study in Type 2 Diabetes Indicates a Role for Genes Involved in β-Cell Function as Well as Insulin Action
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212698/
+  [S5] PMC212699 | PLoS Biology (2003) | Results | Developmental Origin and Evolution of Bacteriocytes in the Aphid– Buchnera  Symbiosis
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212699/
+
+================================================================================================
+[off-4·完整四段链] 完整四段链
+问题：What is the recommended starting dose of pembrolizumab for non-small cell lung cancer in 2024 guidelines?
+期望：语料里没有该药与该指南，应明确说证据不足、不得编造剂量
+------------------------------------------------------------------------------------------------
+## 回答
+现有证据未提供 pembrolizumab 在 2024 年指南中的推荐起始剂量 [S1][S2][S3][S4][S5]。
+
+## 证据要点
+- 所有文献均未涉及 pembrolizumab 的剂量推荐或非小细胞肺癌（NSCLC）的治疗指南 [S1][S2][S3][S4][S5]。  
+- 文献内容主要集中在基因表达分析、V(D)J 重组机制、神经网络研究、糖尿病相关基因以及蚜虫共生体发育等基础科学研究领域 [S1][S2][S3][S4][S5]。
+
+## 证据强度与一致性
+证据以基础科学研究为主，未涉及临床指南或药物剂量推荐，因此无法用于回答关于 pembrolizumab 起始剂量的问题。所有文献均来自 2003 年，与 2024 年指南无关，且无冲突或一致性可言。
+
+## 局限与提示
+- 证据未覆盖 pembrolizumab 的剂量信息或 2024 年临床指南内容，因此无法据此判断推荐起始剂量。  
+- 涉及具体用药、剂量或个体化处置时，需由临床医师结合患者情况判断。
+
+## 参考文献
+[S1] Microarray Analysis PLoS Biology (2003). PMC212694 / PMID 14551912  
+[S2] V(D)J Recombination and the Evolution of the Adaptive Immune System PLoS Biology (2003). PMC212695 / PMID 14551913  
+[S3] Neuroscience Networks PLoS Biology (2003). PMC212696 / PMID 14551914  
+[S4] Candidate Gene Association Study in Type 2 Diabetes Indicates a Role for Genes Involved in β-Cell Function as Well as Insulin Action PLoS Biology (2003). PMC212698 / PMID 14551916  
+[S5] Developmental Origin and Evolution of Bacteriocytes in the Aphid– Buchnera  Symbiosis PLoS Biology (2003). PMC212699 / PMID 14551917
+
+> ⚠ 本回答由检索到的公开文献自动生成，仅供专业文献检索参考，不构成临床诊疗建议；具体用药与处置须由临床医师结合患者情况判断。
+------------------------------------------------------------------------------------------------
+耗时 23.461s | 调用 4 次 | 答案 1125 字 | 上下文 2362 tok
+分阶段耗时：{"context_assembly": 0.041, "evidence_evaluator": 4.31, "answer_generator": 4.805, "critical_reviewer": 6.506, "final_assembler": 7.799, "postprocess": 0.0}
+阶段成功：  {"context_assembly": true, "evidence_evaluator": true, "answer_generator": true, "critical_reviewer": true, "final_assembler": true, "postprocess": true}
+引用：用了 ['S1', 'S2', 'S3', 'S4', 'S5'] / 可用 ['S1', 'S2', 'S3', 'S4', 'S5'] / 编造 []
+出处清单：
+  [S1] PMC212694 | PLoS Biology (2003) | Fundamental Microarray Technology | Microarray Analysis
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212694/
+  [S2] PMC212695 | PLoS Biology (2003) | V(D)J Recombination: A Cut-and-Paste Reaction | V(D)J Recombination and the Evolution of the Adaptive Immune System
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212695/
+  [S3] PMC212696 | PLoS Biology (2003) | (no-section) | Neuroscience Networks
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212696/
+  [S4] PMC212698 | PLoS Biology (2003) | Results/Discussion | Candidate Gene Association Study in Type 2 Diabetes Indicates a Role for Genes Involved in β-Cell Function as Well as Insulin Action
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212698/
+  [S5] PMC212699 | PLoS Biology (2003) | Results | Developmental Origin and Evolution of Bacteriocytes in the Aphid– Buchnera  Symbiosis
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC212699/
+
+================================================================================================
+汇总
+================================================================================================
+{
+  "cases": 12,
+  "all_stages_ok": 10,
+  "json_stage_total": 12,
+  "json_stage_ok": 10,
+  "fabricated_citation_cases": 0,
+  "fabricated_queries": [],
+  "no_citation_cases": 0,
+  "no_citation_queries": [],
+  "time_seconds": {
+    "min": 5.12,
+    "max": 35.81,
+    "mean": 15.2
+  },
+  "answer_chars": {
+    "min": 1067,
+    "max": 2504,
+    "mean": 1757.1
+  },
+  "llm_calls": {
+    "min": 1,
+    "max": 4,
+    "total": 28
+  },
+  "ablation_rows": [
+    {
+      "case": "off-1",
+      "config": "直接作答（对照基线）",
+      "llm_calls": 1,
+      "calls_as_expected": true,
+      "seconds": 6.897,
+      "chars": 2292,
+      "citations_used": 3,
+      "fabricated": 0,
+      "review_issues": null,
+      "review_verdict": null
+    },
+    {
+      "case": "off-1",
+      "config": "评估+作答",
+      "llm_calls": 2,
+      "calls_as_expected": true,
+      "seconds": 10.377,
+      "chars": 2175,
+      "citations_used": 3,
+      "fabricated": 0,
+      "review_issues": null,
+      "review_verdict": null
+    },
+    {
+      "case": "off-1",
+      "config": "完整四段链",
+      "llm_calls": 4,
+      "calls_as_expected": true,
+      "seconds": 31.066,
+      "chars": 2437,
+      "citations_used": 4,
+      "fabricated": 0,
+      "review_issues": 6,
+      "review_verdict": "revise"
+    },
+    {
+      "case": "off-2",
+      "config": "直接作答（对照基线）",
+      "llm_calls": 1,
+      "calls_as_expected": true,
+      "seconds": 5.619,
+      "chars": 1917,
+      "citations_used": 3,
+      "fabricated": 0,
+      "review_issues": null,
+      "review_verdict": null
+    },
+    {
+      "case": "off-2",
+      "config": "评估+作答",
+      "llm_calls": 2,
+      "calls_as_expected": true,
+      "seconds": 15.403,
+      "chars": 2504,
+      "citations_used": 3,
+      "fabricated": 0,
+      "review_issues": null,
+      "review_verdict": null
+    },
+    {
+      "case": "off-2",
+      "config": "完整四段链",
+      "llm_calls": 4,
+      "calls_as_expected": true,
+      "seconds": 35.815,
+      "chars": 2032,
+      "citations_used": 5,
+      "fabricated": 0,
+      "review_issues": 6,
+      "review_verdict": "revise"
+    },
+    {
+      "case": "off-3",
+      "config": "直接作答（对照基线）",
+      "llm_calls": 1,
+      "calls_as_expected": true,
+      "seconds": 5.58,
+      "chars": 1761,
+      "citations_used": 1,
+      "fabricated": 0,
+      "review_issues": null,
+      "review_verdict": null
+    },
+    {
+      "case": "off-3",
+      "config": "评估+作答",
+      "llm_calls": 2,
+      "calls_as_expected": true,
+      "seconds": 8.451,
+      "chars": 1295,
+      "citations_used": 1,
+      "fabricated": 0,
+      "review_issues": null,
+      "review_verdict": null
+    },
+    {
+      "case": "off-3",
+      "config": "完整四段链",
+      "llm_calls": 4,
+      "calls_as_expected": true,
+      "seconds": 25.555,
+      "chars": 1372,
+      "citations_used": 5,
+      "fabricated": 0,
+      "review_issues": 5,
+      "review_verdict": "revise"
+    },
+    {
+      "case": "off-4",
+      "config": "直接作答（对照基线）",
+      "llm_calls": 1,
+      "calls_as_expected": true,
+      "seconds": 5.12,
+      "chars": 1108,
+      "citations_used": 5,
+      "fabricated": 0,
+      "review_issues": null,
+      "review_verdict": null
+    },
+    {
+      "case": "off-4",
+      "config": "评估+作答",
+      "llm_calls": 2,
+      "calls_as_expected": true,
+      "seconds": 9.08,
+      "chars": 1067,
+      "citations_used": 5,
+      "fabricated": 0,
+      "review_issues": null,
+      "review_verdict": null
+    },
+    {
+      "case": "off-4",
+      "config": "完整四段链",
+      "llm_calls": 4,
+      "calls_as_expected": true,
+      "seconds": 23.461,
+      "chars": 1125,
+      "citations_used": 5,
+      "fabricated": 0,
+      "review_issues": 3,
+      "review_verdict": "reject"
+    }
+  ]
+}

@@ -1,0 +1,2436 @@
+{
+  "info": {
+    "name": "医学知识 RAG 问答服务 API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "由 `scripts/服务_验证.py --export-postman` 从**验证脚本的真实运行**导出，不是另写的一套测试。\n\n· 端点覆盖：18/18（全覆盖）\n· 请求条数：录到 55 次调用，去重后 44 条\n· 每条的断言（HTTP 状态 + 业务码）**取自那一轮的真实响应**，不是手写期望值\n\n使用：先起服务 `服务_应用.py --port 8000`，把集合变量 `baseUrl` 指向它。\n顺序跑：新建会话那条会把 `sessionId` 写进集合变量，后面几条才有得用。\n\n⚠ 两件事必须知道：\n1. `POST /api/v1/qa/ask` 与 `/qa/stream` 真跑一次要 **30~100 秒**（四段链 + 层 D 校验），Postman 默认超时要调大。\n2. 本集合只覆盖走 HTTP 的那部分检查。验证脚本里还有一大批**进程内断言**（响应模型边界、错误码表、SQLite 存储、参数校验在模型层被拦下等），它们不经过 HTTP，Postman 里没有对应形态——**集合通过不等于那 165 项通过**。",
+    "_postman_id": "medrag-api-v0.10.2"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8000"
+    },
+    {
+      "key": "apiKey",
+      "value": ""
+    },
+    {
+      "key": "sessionId",
+      "value": ""
+    },
+    {
+      "key": "requestId",
+      "value": ""
+    },
+    {
+      "key": "docId",
+      "value": "PMC212698"
+    }
+  ],
+  "item": [
+    {
+      "name": "C 全局异常处理（真起 TestClient）",
+      "item": [
+        {
+          "name": "GET /api/v1/no-such-thing  → 404/3001",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/no-such-thing",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "no-such-thing"
+              ],
+              "query": []
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "pm.test('业务码 3001', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(3001);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /health  → 200/0",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ],
+              "query": []
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/v1/qa/ask  → 400/1002",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/qa/ask",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "qa",
+                "ask"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"top_k\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test('业务码 1002', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(1002);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});",
+                  "var d2 = pm.response.json().data || {};",
+                  "if (d2.request_id) pm.collectionVariables.set('requestId', d2.request_id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/v1/qa/ask  → 400/1003",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/qa/ask",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "qa",
+                "ask"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"x\",\n  \"top_k\": 999\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test('业务码 1003', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(1003);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});",
+                  "var d2 = pm.response.json().data || {};",
+                  "if (d2.request_id) pm.collectionVariables.set('requestId', d2.request_id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/v1/qa/ask  → 400/1004",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/qa/ask",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "qa",
+                "ask"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{not json",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test('业务码 1004', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(1004);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});",
+                  "var d2 = pm.response.json().data || {};",
+                  "if (d2.request_id) pm.collectionVariables.set('requestId', d2.request_id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/v1/qa/ask  → 400/1001",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/qa/ask",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "qa",
+                "ask"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"    \"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test('业务码 1001', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(1001);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});",
+                  "var d2 = pm.response.json().data || {};",
+                  "if (d2.request_id) pm.collectionVariables.set('requestId', d2.request_id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/v1/qa/ask  → 400/1001",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/qa/ask",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "qa",
+                "ask"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"  \",\n  \"top_k\": 999\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test('业务码 1001', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(1001);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});",
+                  "var d2 = pm.response.json().data || {};",
+                  "if (d2.request_id) pm.collectionVariables.set('requestId', d2.request_id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/sessions/does-not-exist  → 404/3002",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sessions/does-not-exist",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "sessions",
+                "does-not-exist"
+              ],
+              "query": []
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "pm.test('业务码 3002', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(3002);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/nope  → 404/3001",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              },
+              {
+                "key": "X-Request-Id",
+                "value": "req-my-own-id"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/nope",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "nope"
+              ],
+              "query": []
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "pm.test('业务码 3001', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(3001);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "D2 request_id 跨线程池传递（同步路由跑在线程池里）",
+      "item": [
+        {
+          "name": "POST /api/v1/qa/ask  → 200/0",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Request-Id",
+                "value": "req-ctxvar-probe"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/qa/ask",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "qa",
+                "ask"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"CRISPR-Cas9 的脱靶效应如何检测？\",\n  \"top_k\": 4,\n  \"evaluate\": false,\n  \"review\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});",
+                  "var d2 = pm.response.json().data || {};",
+                  "if (d2.request_id) pm.collectionVariables.set('requestId', d2.request_id);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "G 同步问答（stub 生成器 + 真检索快照，走真链路）",
+      "item": [
+        {
+          "name": "POST /api/v1/qa/ask  → 200/0",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/qa/ask",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "qa",
+                "ask"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"CRISPR-Cas9 的脱靶效应如何检测？\",\n  \"top_k\": 6\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});",
+                  "var d2 = pm.response.json().data || {};",
+                  "if (d2.request_id) pm.collectionVariables.set('requestId', d2.request_id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/qa/logs/{{requestId}}  → 200/0",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/qa/logs/{{requestId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "qa",
+                "logs",
+                "{{requestId}}"
+              ],
+              "query": []
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/qa/logs/req-nope  → 404/3003",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/qa/logs/req-nope",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "qa",
+                "logs",
+                "req-nope"
+              ],
+              "query": []
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "pm.test('业务码 3003', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(3003);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/qa/logs  → 200/0",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/qa/logs?page=1&page_size=2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "qa",
+                "logs"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/qa/stats  → 200/0",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/qa/stats",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "qa",
+                "stats"
+              ],
+              "query": []
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/v1/qa/ask  → 200/0",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/qa/ask",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "qa",
+                "ask"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"CRISPR-Cas9 的脱靶效应如何检测？\",\n  \"top_k\": 6,\n  \"evaluate\": false,\n  \"review\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});",
+                  "var d2 = pm.response.json().data || {};",
+                  "if (d2.request_id) pm.collectionVariables.set('requestId', d2.request_id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/v1/qa/ask  → 200/0",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/qa/ask",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "qa",
+                "ask"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"CRISPR-Cas9 的脱靶效应如何检测？\",\n  \"top_k\": 6,\n  \"evidence_pool\": \"live-2\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});",
+                  "var d2 = pm.response.json().data || {};",
+                  "if (d2.request_id) pm.collectionVariables.set('requestId', d2.request_id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/v1/qa/ask  → 400/1001",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/qa/ask",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "qa",
+                "ask"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"CRISPR-Cas9 的脱靶效应如何检测？\",\n  \"top_k\": 6,\n  \"evidence_pool\": \"live-99\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test('业务码 1001', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(1001);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});",
+                  "var d2 = pm.response.json().data || {};",
+                  "if (d2.request_id) pm.collectionVariables.set('requestId', d2.request_id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/qa/topics  → 200/0",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/qa/topics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "qa",
+                "topics"
+              ],
+              "query": []
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/qa/topics  → 200/0",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/qa/topics?probe=CRISPR-Cas9 的脱靶效应如何检测？",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "qa",
+                "topics"
+              ],
+              "query": [
+                {
+                  "key": "probe",
+                  "value": "CRISPR-Cas9 的脱靶效应如何检测？"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/qa/topics  → 200/0",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/qa/topics?probe=发烧怎么治疗",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "qa",
+                "topics"
+              ],
+              "query": [
+                {
+                  "key": "probe",
+                  "value": "发烧怎么治疗"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "G2 会话关联：历史只用于改写检索式，绝不进证据区",
+      "item": [
+        {
+          "name": "POST /api/v1/sessions  → 200/0",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sessions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "sessions"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"session_id\": \"sess-created-001\",\n  \"title\": \"手工建的会话\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});",
+                  "var d = pm.response.json().data || {};",
+                  "if (d.session_id) pm.collectionVariables.set('sessionId', d.session_id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/v1/sessions  → 200/0",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sessions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "sessions"
+              ],
+              "query": []
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});",
+                  "var d = pm.response.json().data || {};",
+                  "if (d.session_id) pm.collectionVariables.set('sessionId', d.session_id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/sessions  → 200/0",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sessions?page=1&page_size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "sessions"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/v1/qa/ask  → 200/0",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/qa/ask",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "qa",
+                "ask"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"帕博利珠单抗在非小细胞肺癌中的疗效如何？\",\n  \"top_k\": 6,\n  \"session_id\": \"sess-test-001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});",
+                  "var d2 = pm.response.json().data || {};",
+                  "if (d2.request_id) pm.collectionVariables.set('requestId', d2.request_id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/sessions/{{sessionId}}  → 200/0",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sessions/{{sessionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "sessions",
+                "{{sessionId}}"
+              ],
+              "query": []
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/v1/qa/ask  → 200/0",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/qa/ask",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "qa",
+                "ask"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"它的不良反应呢？\",\n  \"top_k\": 6,\n  \"session_id\": \"sess-test-001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});",
+                  "var d2 = pm.response.json().data || {};",
+                  "if (d2.request_id) pm.collectionVariables.set('requestId', d2.request_id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/v1/qa/ask  → 200/0",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/qa/ask",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "qa",
+                "ask"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"它的不良反应呢？\",\n  \"top_k\": 6,\n  \"session_id\": \"sess-test-001\",\n  \"include_intermediate\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});",
+                  "var d2 = pm.response.json().data || {};",
+                  "if (d2.request_id) pm.collectionVariables.set('requestId', d2.request_id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /api/v1/qa/ask  → 200/0",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/qa/ask",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "qa",
+                "ask"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"它的不良反应呢？\",\n  \"top_k\": 6,\n  \"session_id\": \"sess-test-001\",\n  \"rewrite\": \"none\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});",
+                  "var d2 = pm.response.json().data || {};",
+                  "if (d2.request_id) pm.collectionVariables.set('requestId', d2.request_id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /api/v1/sessions/{{sessionId}}  → 200/0",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sessions/{{sessionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "sessions",
+                "{{sessionId}}"
+              ],
+              "query": []
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/sessions/sess-test-001  → 404/3002",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/sessions/sess-test-001",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "sessions",
+                "sess-test-001"
+              ],
+              "query": []
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "pm.test('业务码 3002', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(3002);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "H 流式问答（SSE）",
+      "item": [
+        {
+          "name": "POST /api/v1/qa/stream  → 200/None",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/qa/stream",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "qa",
+                "stream"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"CRISPR-Cas9 的脱靶效应如何检测？\",\n  \"top_k\": 6\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/qa/stream  → 200/None",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/qa/stream?query=法布里病的酶替代治疗证据&top_k=4",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "qa",
+                "stream"
+              ],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "法布里病的酶替代治疗证据"
+                },
+                {
+                  "key": "top_k",
+                  "value": "4"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "I 健康检查",
+      "item": [
+        {
+          "name": "GET /health/ready  → 200/0",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/health/ready",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health",
+                "ready"
+              ],
+              "query": []
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/errors  → 200/0",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/errors",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "errors"
+              ],
+              "query": []
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/config  → 200/0",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/config",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "config"
+              ],
+              "query": []
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "M 元信息端点（/ 、错误码表、生效配置）",
+      "item": [
+        {
+          "name": "GET /  → 200/0",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [],
+              "query": []
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "N 文档管理接口（列表 / 过滤 / 游标 / 详情 / 3001 / 3004）",
+      "item": [
+        {
+          "name": "GET /api/v1/documents  → 200/0",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/documents?limit=3",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "documents"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "3"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});",
+                  "var d3 = (pm.response.json().data || {}).items || [];",
+                  "if (d3.length) pm.collectionVariables.set('docId', d3[0].pmcid);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/documents  → 200/0",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/documents?limit=3&cursor=PMC000003",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "documents"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "3"
+                },
+                {
+                  "key": "cursor",
+                  "value": "PMC000003"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});",
+                  "var d3 = (pm.response.json().data || {}).items || [];",
+                  "if (d3.length) pm.collectionVariables.set('docId', d3[0].pmcid);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/documents  → 200/0",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/documents?journal=PLoS ONE&with_total=True",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "documents"
+              ],
+              "query": [
+                {
+                  "key": "journal",
+                  "value": "PLoS ONE"
+                },
+                {
+                  "key": "with_total",
+                  "value": "True"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});",
+                  "var d3 = (pm.response.json().data || {}).items || [];",
+                  "if (d3.length) pm.collectionVariables.set('docId', d3[0].pmcid);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/documents  → 200/0",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/documents?year_from=2021&year_to=2023",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "documents"
+              ],
+              "query": [
+                {
+                  "key": "year_from",
+                  "value": "2021"
+                },
+                {
+                  "key": "year_to",
+                  "value": "2023"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});",
+                  "var d3 = (pm.response.json().data || {}).items || [];",
+                  "if (d3.length) pm.collectionVariables.set('docId', d3[0].pmcid);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/documents  → 200/0",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/documents?title=Fabry",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "documents"
+              ],
+              "query": [
+                {
+                  "key": "title",
+                  "value": "Fabry"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});",
+                  "var d3 = (pm.response.json().data || {}).items || [];",
+                  "if (d3.length) pm.collectionVariables.set('docId', d3[0].pmcid);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/documents/{{docId}}  → 200/0",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/documents/{{docId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "documents",
+                "{{docId}}"
+              ],
+              "query": []
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('业务码 0', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(0);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/v1/documents/PMC999999  → 404/3001",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}",
+                "description": "服务未开鉴权时留空即可"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/documents/PMC999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "documents",
+                "PMC999999"
+              ],
+              "query": []
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "pm.test('业务码 3001', function () {",
+                  "    pm.expect(pm.response.json().code).to.eql(3001);",
+                  "});",
+                  "pm.test('统一响应体字段齐全', function () {",
+                  "    var b = pm.response.json();",
+                  "    pm.expect(b).to.have.property('request_id');",
+                  "    pm.expect(b).to.have.property('timestamp');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

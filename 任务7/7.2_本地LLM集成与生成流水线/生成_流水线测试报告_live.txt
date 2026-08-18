@@ -1,0 +1,240 @@
+生成流水线测试报告 · mode=live
+生成时间：2026-07-31 18:47:31
+用例 4 个
+
+================================================================================================
+[live-1] ① 编造参考文献
+问题：What are the key published studies on CRISPR-Cas9 off-target effects, and what did they find?
+裸模型当时的错：裸模型当时给出的标题/期刊/卷页全是编的
+期望：参考文献必须来自检索证据，[S#] 与文末列表一一对应，不得出现编造编号
+------------------------------------------------------------------------------------------------
+## 回答
+CRISPR-Cas9 off-target effects have been investigated in multiple studies, with a focus on Streptococcus pyogenes Cas9 [S1]. Research has shown that Cas12a causes off-target effects in mammalian cells, though to a lesser extent than Cas9 [S2]. Off-target effects are influenced by factors such as gRNA concentration and Cas9 protein expression levels [S4].
+
+## 证据要点
+- A review highlights that studies have examined off-target effects of CRISPR/Cas9, particularly focusing on Streptococcus pyogenes Cas9 [S1].  
+- A 2024 study using GUIDE-seq found that Cas12a causes off-target mutations in mammalian cells, though to a lesser extent than Cas9 [S2].  
+- A 2024 study discusses how gRNA concentration and Cas9 protein expression levels are key factors affecting off-target effects [S4].  
+- A 2020 study explains that DNA mismatches at the distal end of the PAM sequence can interfere with the activation of the HNH domain [S5].
+
+## 证据强度与一致性
+证据主要来源于回顾性研究、实验研究和方法学分析，涵盖2020年至2024年的研究。研究之间在描述CRISPR-Cas9 off-target effects的存在和影响因素方面基本一致，但未提供统一的量化数据或临床验证，因此结论的强度和一致性受到一定限制。
+
+## 局限与提示
+现有证据主要基于体外实验、动物模型和方法学研究，缺乏临床试验或患者数据，因此无法评估其在人体中的实际影响。此外，研究未明确说明off-target effects的具体频率或严重程度，仅描述了其存在和潜在影响因素。涉及具体用药、剂量或个体化处置时，需由临床医师结合患者情况判断。
+
+## 参考文献
+[S1] crisprSQL: a novel database platform for CRISPR/Cas off-target cleavage assays Nucleic Acids Research (2021). PMC7778913 / PMID 33084893  
+[S2] Engineering of Cas12a nuclease variants with enhanced genome-editing specificity PLOS Biology (2024). PMC10965058 / PMID 38483978  
+[S3] Progresses, Challenges, and Prospects of CRISPR/Cas9 Gene-Editing in Glioma Studies Cancers (2023). PMC9856991  
+[S4] HyCas9-12aGEP: an efficient genome editing platform for  Corynebacterium glutamicum Frontiers in Bioengineering and Biotechnology (2024). PMC10963414 / PMID 38532881  
+[S5] Spontaneous Embedding of DNA Mismatches Within the RNA:DNA Hybrid of CRISPR-Cas9 Frontiers in Molecular Biosciences (2020). PMC7093078 / PMID 32258048
+
+> ⚠ 本回答由检索到的公开文献自动生成，仅供专业文献检索参考，不构成临床诊疗建议；具体用药与处置须由临床医师结合患者情况判断。
+------------------------------------------------------------------------------------------------
+耗时 45.93s | 调用 4 次 | 答案 2028 字 | 上下文 2333 tok
+分阶段耗时：{"context_assembly": 0.021, "evidence_evaluator": 5.361, "answer_generator": 13.137, "critical_reviewer": 15.534, "final_assembler": 11.878, "postprocess": 0.0, "retrieval": 1.268}
+阶段成功：  {"context_assembly": true, "evidence_evaluator": true, "answer_generator": true, "critical_reviewer": true, "final_assembler": true, "postprocess": true}
+引用：用了 ['S1', 'S2', 'S3', 'S4', 'S5'] / 可用 ['S1', 'S2', 'S3', 'S4', 'S5'] / 编造 []
+出处清单：
+  [S1] PMC7778913 | Nucleic Acids Research (2021) | MATERIALS AND METHODS | crisprSQL: a novel database platform for CRISPR/Cas off-target cleavage assays
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7778913/
+  [S2] PMC10965058 | PLOS Biology (2024) | Discussion | Engineering of Cas12a nuclease variants with enhanced genome-editing specificity
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10965058/
+  [S3] PMC9856991 | Cancers (2023) | 3. Challenges | Progresses, Challenges, and Prospects of CRISPR/Cas9 Gene-Editing in Glioma Studies
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9856991/
+  [S4] PMC10963414 | Frontiers in Bioengineering and Biotechnology (2024) | Introduction | HyCas9-12aGEP: an efficient genome editing platform for  Corynebacterium glutamicum
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10963414/
+  [S5] PMC7093078 | Frontiers in Molecular Biosciences (2020) | Abstract | Spontaneous Embedding of DNA Mismatches Within the RNA:DNA Hybrid of CRISPR-Cas9
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7093078/
+
+================================================================================================
+[live-2] ② 罕见病药名张冠李戴
+问题：Which enzyme replacement therapies are used for Fabry disease, and what evidence supports them?
+裸模型当时的错：裸模型把法布里病的品牌名安到了别的药上
+期望：药名须能在证据里逐一核到；核不到就说证据不足
+------------------------------------------------------------------------------------------------
+## 回答
+Enzyme replacement therapy (ERT) with recombinant human α-galactosidase is used for Fabry disease, as implied in the evidence [S4]. The treatability of Fabry disease with ERT and chaperone therapy (migalastat) is supported by the evidence [S1]. Agalsidase-α and agalsidase-β are mentioned as ERT options for Fabry disease [S5]. Patients who do not produce α-galactosidase A (AGAL) require ERT, as stated in the evidence [S3].
+
+## 证据要点
+- ERT with recombinant human α-galactosidase has been available since 2001 in Europe and 2003 in the USA [S4].  
+- FD is treatable with ERT and chaperone therapy (migalastat), as stated in a review article [S1].  
+- Agalsidase-α and agalsidase-β are currently used as ERT options for FD, as noted in a review [S5].  
+- Patients who do not produce AGAL require ERT, as stated in a review of FD pathophysiology [S3].  
+
+## 证据强度与一致性
+The evidence is primarily based on review articles and case reports, with some observational study designs. The findings are generally consistent across sources, though the evidence for specific outcomes (e.g., long-term efficacy, comparative effectiveness of therapies) is limited. The evidence spans from 2001 to 2023, reflecting a growing body of knowledge on Fabry disease treatment.
+
+## 局限与提示
+- The evidence does not provide detailed information on long-term efficacy or safety of ERT beyond initial treatment periods.  
+- The effectiveness of migalastat as a chaperone therapy is mentioned, but specific outcomes or comparative data with ERT are not provided.  
+- The role of SGLT2 inhibitors like dapagliflozin in FD is under investigation, but no conclusive evidence is presented in the available data.  
+- The eligibility criteria for migalastat are not fully clarified, and its effectiveness may vary depending on the specific GLA variant.  
+- The use of ERT and chaperone therapy should be guided by clinical judgment and individual patient needs, as these therapies are not universally applicable to all patients with Fabry disease.
+
+## 参考文献
+[S1] Endothelial Dysfunction in Fabry Disease Is Related to Glycocalyx Degradation Frontiers in Immunology (2021). PMC8670230 / PMID 34917096  
+[S2] Dapaglifozin on Albuminuria in Chronic Kidney Disease Patients with FabrY Disease: The DEFY Study Design and Protocol Journal of Clinical Medicine (2023). PMC10253838  
+[S3] Drug Repositioning for Fabry Disease: Acetylsalicylic Acid Potentiates the Stabilization of Lysosomal Alpha-Galactosidase by Pharmacological Chaperones International Journal of Molecular Sciences (2022). PMC9105905  
+[S4] Case Report: First Two Identified Cases of Fabry Disease in Central Asia Frontiers in Genetics (2021). PMC8110900 / PMID 33986771  
+[S5] Downregulation of Mannose-6-Phosphate Receptors in Fabry Disease Cardiomyopathy: A Potential Target for Enzyme Therapy Enhancement Journal of Clinical Medicine (2022). PMC9502235
+
+> ⚠ 本回答由检索到的公开文献自动生成，仅供专业文献检索参考，不构成临床诊疗建议；具体用药与处置须由临床医师结合患者情况判断。
+------------------------------------------------------------------------------------------------
+耗时 44.622s | 调用 4 次 | 答案 2951 字 | 上下文 2394 tok
+分阶段耗时：{"context_assembly": 0.024, "evidence_evaluator": 5.895, "answer_generator": 8.071, "critical_reviewer": 17.493, "final_assembler": 13.139, "postprocess": 0.0, "retrieval": 0.629}
+阶段成功：  {"context_assembly": true, "evidence_evaluator": true, "answer_generator": true, "critical_reviewer": true, "final_assembler": true, "postprocess": true}
+引用：用了 ['S1', 'S2', 'S3', 'S4', 'S5'] / 可用 ['S1', 'S2', 'S3', 'S4', 'S5'] / 编造 []
+出处清单：
+  [S1] PMC8670230 | Frontiers in Immunology (2021) | Introduction | Endothelial Dysfunction in Fabry Disease Is Related to Glycocalyx Degradation
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8670230/
+  [S2] PMC10253838 | Journal of Clinical Medicine (2023) | Abstract | Dapaglifozin on Albuminuria in Chronic Kidney Disease Patients with FabrY Disease: The DEFY Study Design and Protocol
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10253838/
+  [S3] PMC9105905 | International Journal of Molecular Sciences (2022) | 1. Introduction | Drug Repositioning for Fabry Disease: Acetylsalicylic Acid Potentiates the Stabilization of Lysosomal Alpha-Galactosidase by Pharmacological Chaperones
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9105905/
+  [S4] PMC8110900 | Frontiers in Genetics (2021) | Discussion and Conclusion | Case Report: First Two Identified Cases of Fabry Disease in Central Asia
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8110900/
+  [S5] PMC9502235 | Journal of Clinical Medicine (2022) | 1. Introduction | Downregulation of Mannose-6-Phosphate Receptors in Fabry Disease Cardiomyopathy: A Potential Target for Enzyme Therapy Enhancement
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9502235/
+
+================================================================================================
+[live-3] ③ 药物分类错误
+问题：How are disease-modifying therapies for multiple sclerosis classified, and what are examples of each class?
+裸模型当时的错：裸模型把单抗 / S1P 调节剂 / 干扰素三类混为一谈
+期望：分类须有证据支持，证据不足的类别应明说而不是硬分
+------------------------------------------------------------------------------------------------
+## 回答
+Disease-modifying therapies (DMTs) for multiple sclerosis are identified as either moderately effective or highly effective based on their efficacy in reducing disease activity [S2]. Examples of highly effective DMTs include ocrelizumab and cladribine [S2]. Glatiramer acetate is used as a first-line DMT for relapsing–remitting MS [S4]. Natalizumab is a monoclonal antibody used to reduce inflammation in the central nervous system [S5].
+
+## 证据要点
+- DMTs are described as being identified as moderately effective (e.g., interferon-β, dimethyl fumarate) and highly effective (e.g., ocrelizumab, cladribine) based on their efficacy in clinical trials [S2].  
+- Glatiramer acetate is mentioned as a first-line DMT for relapsing–remitting MS [S4].  
+- Natalizumab is described as a monoclonal antibody that reduces inflammation in the central nervous system by blocking VLA-4 [S5].  
+- Over 15 DMTs have been licensed since 1993, but no detailed classification system or category names are provided [S6].
+
+## 证据强度与一致性
+证据主要来源于临床研究、综述和个案报告（2022–2023年）。关于DMTs的分类，仅在S2中提到其被识别为中等有效和高度有效，但未明确说明这是正式的分类体系。其他文献未提供详细的分类标准或类别名称。因此，证据在分类体系方面存在不一致，且缺乏系统性的分类框架。
+
+## 局限与提示
+现有证据未提供DMTs的详细分类体系或权威分类框架，仅提到中等有效和高度有效两类 [S2]。某些药物如glatiramer acetate和natalizumab虽然被提及，但其分类依据未在证据中详细说明。涉及具体用药、剂量或个体化处置时，需由临床医师结合患者情况判断。
+
+## 参考文献
+[S1] National plans and awareness campaigns as priorities for achieving global brain health The Lancet. Global Health (2024). PMC10951964  
+[S2] Cladribine and ocrelizumab induce differential miRNA profiles in peripheral blood mononucleated cells from relapsing–remitting multiple sclerosis patients Frontiers in Immunology (2023). PMC10751352 / PMID 38152407  
+[S3] Polypharmacy in patients with multiple sclerosis and the impact on levels of care and therapy units Frontiers in Neurology (2023). PMC10768059  
+[S4] Drug‐induced liver injury by glatiramer acetate leading to liver transplant: A case report JGH Open: An Open Access Journal of Gastroenterology and Hepatology (2023). PMC10463015 / PMID 37649866  
+[S5] Adverse Obstetric Outcomes in Pregnant Women Using Natalizumab for the Treatment of Multiple Sclerosis: A Systematic Review Cureus (2022). PMC9635932 / PMID 36381897  
+[S6] Immunotherapy for people with clinically isolated syndrome or relapsing-remitting multiple sclerosis: treatment response by demographic, clinical, and biomarker subgroups (PROMISE)—a systematic review protocol Systematic Reviews (2022). PMC9250266
+
+> ⚠ 本回答由检索到的公开文献自动生成，仅供专业文献检索参考，不构成临床诊疗建议；具体用药与处置须由临床医师结合患者情况判断。
+------------------------------------------------------------------------------------------------
+耗时 33.815s | 调用 4 次 | 答案 2511 字 | 上下文 2396 tok
+分阶段耗时：{"context_assembly": 0.016, "evidence_evaluator": 5.481, "answer_generator": 7.046, "critical_reviewer": 9.066, "final_assembler": 12.205, "postprocess": 0.001, "retrieval": 0.559}
+阶段成功：  {"context_assembly": true, "evidence_evaluator": true, "answer_generator": true, "critical_reviewer": true, "final_assembler": true, "postprocess": true}
+引用：用了 ['S1', 'S2', 'S3', 'S4', 'S5', 'S6'] / 可用 ['S1', 'S2', 'S3', 'S4', 'S5', 'S6'] / 编造 []
+出处清单：
+  [S1] PMC10951964 | The Lancet. Global Health (2024) | Six strategic drivers to achieve IGAP priority targets | National plans and awareness campaigns as priorities for achieving global brain health
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10951964/
+  [S2] PMC10751352 | Frontiers in Immunology (2023) | Introduction | Cladribine and ocrelizumab induce differential miRNA profiles in peripheral blood mononucleated cells from relapsing–remitting multiple sclerosis patients
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10751352/
+  [S3] PMC10768059 | Frontiers in Neurology (2023) | Introduction | Polypharmacy in patients with multiple sclerosis and the impact on levels of care and therapy units
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10768059/
+  [S4] PMC10463015 | JGH Open: An Open Access Journal of Gastroenterology and Hepatology (2023) | Introduction | Drug‐induced liver injury by glatiramer acetate leading to liver transplant: A case report
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10463015/
+  [S5] PMC9635932 | Cureus (2022) | Introduction and background | Adverse Obstetric Outcomes in Pregnant Women Using Natalizumab for the Treatment of Multiple Sclerosis: A Systematic Review
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9635932/
+  [S6] PMC9250266 | Systematic Reviews (2022) | Abstract | Immunotherapy for people with clinically isolated syndrome or relapsing-remitting multiple sclerosis: treatment response by demographic, clinical, and biomarker subgroups (PROMISE)—a systematic review protocol
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9250266/
+
+================================================================================================
+[live-4] ④ 最新药物时间线自相矛盾
+问题：What is the current evidence for anti-amyloid monoclonal antibodies in Alzheimer disease, and when were the key trials reported?
+裸模型当时的错：裸模型给出的年份前后自相矛盾
+期望：年份须来自证据元数据；证据年份跨度要在'证据强度与一致性'里说明
+------------------------------------------------------------------------------------------------
+## 回答
+Lecanemab is an anti-amyloid monoclonal antibody approved by the FDA for early Alzheimer’s disease, based on phase 2 and phase 3 trial results [S5]. Aducanumab was also approved via an accelerated pathway, and its clinical benefit was mixed, with significant slowing of cognitive decline observed in one of two phase 3 trials [S5].
+
+## 证据要点
+- Lecanemab targets protofibrils of amyloid-beta and was approved by the FDA on January 6, 2023, based on phase 2 and phase 3 trial results [S5].  
+- The phase 3 CLARITY-AD trial, reported in November 2022, showed significant slowing of progression on the clinical dementia rating scale-sum of boxes at 18 months, with a mean change from baseline between patients treated with lecanemab vs. placebo of −0.45 (p < 0.001) [S5].  
+- Aducanumab was approved in 2021 via an accelerated pathway and showed time- and dose-dependent reduction of amyloid-beta and cognition improvement in clinical trials [S2][S5].  
+- The FDA was expected to review data from the CLARITY-AD trial for standard approval in mid-2023, but the decision has not been confirmed [S1].  
+
+## 证据强度与一致性
+证据主要来源于临床试验（phase 2 和 phase 3），且部分结果在不同研究中保持一致，如 lecanemab 的 amyloid 降低和认知减缓效果。然而，关于 aducanumab 的临床益处存在不一致性，仅在一项 phase 3 试验中观察到显著的延缓认知衰退。整体证据强度中等，部分结论基于初步或未完全确认的数据。
+
+## 局限与提示
+- 现有证据未明确说明 lecanemab phase 2 试验的具体结果，仅提到其降低了 amyloid 脑斑 [S1]。  
+- lecanemab 的长期疗效和安全性仍在通过扩展研究进行评估 [S5]。  
+- aducanumab 的临床益处尚不确定，仅在一项 phase 3 试验中观察到显著的延缓认知衰退 [S5]。  
+- 临床应用需结合患者个体情况，由临床医师判断是否适用 [S1][S5]。  
+
+## 参考文献
+[S1] Lecanemab: Appropriate Use Recommendations The journal of prevention of Alzheimer's disease (2023). PMC10313141 / PMID 37357276  
+[S2] Aducanumab—Hope or Disappointment for Alzheimer’s Disease International Journal of Molecular Sciences (2023). PMC10002282  
+[S3] Critical Appraisal of Amyloid Lowering Agents in AD Current Neurology and Neuroscience Reports (2021). PMC8192384 / PMID 34110536  
+[S4] Performance of Fully Automated Plasma Assays as Screening Tests for Alzheimer Disease–Related β-Amyloid Status JAMA Neurology (2019). PMC6593637 / PMID 31233127  
+[S5] FDA approval of lecanemab: the real start of widespread amyloid PET use? — the EANM Neuroimaging Committee perspective European Journal of Nuclear Medicine and Molecular Imaging (2023). PMC10119064 / PMID 36869178  
+[S6] Neuroprotective and Disease-Modifying Effects of the Triazinetrione ACD856, a Positive Allosteric Modulator of Trk-Receptors for the Treatment of Cognitive Dysfunction in Alzheimer’s Disease International Journal of Molecular Sciences (2023). PMC10342804
+
+> ⚠ 本回答由检索到的公开文献自动生成，仅供专业文献检索参考，不构成临床诊疗建议；具体用药与处置须由临床医师结合患者情况判断。
+------------------------------------------------------------------------------------------------
+耗时 43.913s | 调用 4 次 | 答案 2621 字 | 上下文 2395 tok
+分阶段耗时：{"context_assembly": 0.016, "evidence_evaluator": 6.323, "answer_generator": 8.34, "critical_reviewer": 15.624, "final_assembler": 13.608, "postprocess": 0.0, "retrieval": 0.77}
+阶段成功：  {"context_assembly": true, "evidence_evaluator": true, "answer_generator": true, "critical_reviewer": true, "final_assembler": true, "postprocess": true}
+引用：用了 ['S1', 'S2', 'S3', 'S4', 'S5', 'S6'] / 可用 ['S1', 'S2', 'S3', 'S4', 'S5', 'S6'] / 编造 []
+出处清单：
+  [S1] PMC10313141 | The journal of prevention of Alzheimer's disease (2023) | Introduction | Lecanemab: Appropriate Use Recommendations
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10313141/
+  [S2] PMC10002282 | International Journal of Molecular Sciences (2023) | Abstract | Aducanumab—Hope or Disappointment for Alzheimer’s Disease
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10002282/
+  [S3] PMC8192384 | Current Neurology and Neuroscience Reports (2021) | Abstract | Critical Appraisal of Amyloid Lowering Agents in AD
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8192384/
+  [S4] PMC6593637 | JAMA Neurology (2019) | Introduction | Performance of Fully Automated Plasma Assays as Screening Tests for Alzheimer Disease–Related β-Amyloid Status
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6593637/
+  [S5] PMC10119064 | European Journal of Nuclear Medicine and Molecular Imaging (2023) | (no-section) | FDA approval of lecanemab: the real start of widespread amyloid PET use? — the EANM Neuroimaging Committee perspective
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10119064/
+  [S6] PMC10342804 | International Journal of Molecular Sciences (2023) | 1. Introduction | Neuroprotective and Disease-Modifying Effects of the Triazinetrione ACD856, a Positive Allosteric Modulator of Trk-Receptors for the Treatment of Cognitive Dysfunction in Alzheimer’s Disease
+      https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10342804/
+
+================================================================================================
+汇总
+================================================================================================
+{
+  "cases": 4,
+  "all_stages_ok": 4,
+  "json_stage_total": 8,
+  "json_stage_ok": 8,
+  "fabricated_citation_cases": 0,
+  "fabricated_queries": [],
+  "no_citation_cases": 0,
+  "no_citation_queries": [],
+  "time_seconds": {
+    "min": 33.81,
+    "max": 45.93,
+    "mean": 42.07
+  },
+  "answer_chars": {
+    "min": 2028,
+    "max": 2951,
+    "mean": 2527.8
+  },
+  "llm_calls": {
+    "min": 4,
+    "max": 4,
+    "total": 16
+  },
+  "retrieval_snapshot": {
+    "created": "2026-07-31 18:38:27",
+    "top_k": 10,
+    "retriever_load_seconds": 67.2,
+    "search_seconds": [
+      1.268,
+      0.629,
+      0.559,
+      0.77
+    ]
+  }
+}

@@ -1,0 +1,87 @@
+2026-08-11 15:08:38 INFO    [-] uvicorn.error: Started server process [6852]
+2026-08-11 15:08:38 INFO    [-] uvicorn.error: Waiting for application startup.
+2026-08-11 15:08:38 WARNING [-] medrag.app: medrag-api v0.10.1 启动｜检索模式 live｜约束层 开｜并发上限 2｜鉴权 关
+2026-08-11 15:08:40 WARNING [-] medrag.app: 开始加载检索器（首次约 15.8GB 内存 + 数分钟）…
+2026-08-11 15:09:51 WARNING [-] medrag.app: 检索器就绪，用时 70.9s
+2026-08-11 15:09:51 WARNING [-] medrag.app: 生成流水线就绪，用时 73.4s（约束层 开）
+2026-08-11 15:09:54 WARNING [-] medrag.app: 预热：{'seconds': 76.07, 'pipeline_loaded': True, 'llm_warmup_seconds': 2.71, 'errors': []}
+2026-08-11 15:09:54 INFO    [-] uvicorn.error: Application startup complete.
+2026-08-11 15:09:54 INFO    [-] uvicorn.error: Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2026-08-11 15:10:02 INFO    [req-6901a4d1] medrag.access: GET /health/ready → 200  2142.3ms
+2026-08-11 15:10:02 INFO    [req-b4a63ed2] medrag.access: GET /api/v1/qa/stats → 200  23.1ms
+2026-08-11 15:10:02 INFO    [req-bb881a0d] medrag.access: GET /health/ready → 200  0.9ms
+2026-08-11 15:13:34 INFO    [req-3f54bf24] medrag.access: GET /health/ready → 200  2010.9ms
+2026-08-11 15:13:34 INFO    [req-0dd11bae] medrag.access: GET /api/v1/qa/topics → 200  3.8ms
+2026-08-11 15:58:18 INFO    [req-1977887c] medrag.qa: 同步问答完成｜1800 字｜4 次调用｜拒答=True｜58252.8ms
+2026-08-11 15:58:18 INFO    [req-1977887c] medrag.access: POST /api/v1/qa/ask → 200  58263.2ms
+2026-08-11 16:00:51 INFO    [req-0e4e32c9] medrag.access: GET /api/v1/qa/logs → 200  7.1ms
+2026-08-11 16:01:09 INFO    [req-0c144609] medrag.access: POST /api/v1/qa/stream → 200  3.5ms
+2026-08-11 16:01:42 INFO    [req-0c144609] medrag.qa: 流式问答完成｜1643 字｜2 次调用｜拒答=False｜32680.4ms
+2026-08-11 16:03:53 INFO    [req-411d9acf] medrag.access: POST /api/v1/qa/stream → 200  2.8ms
+2026-08-11 16:04:25 INFO    [req-411d9acf] medrag.qa: 流式问答完成｜1469 字｜1 次调用｜拒答=True｜31907.4ms
+2026-08-11 16:05:48 INFO    [req-cfb9c34f] medrag.access: POST /api/v1/qa/stream → 200  1.2ms
+2026-08-11 16:06:19 INFO    [req-cfb9c34f] medrag.qa: 流式问答完成｜1708 字｜2 次调用｜拒答=True｜30588.5ms
+2026-08-11 16:09:27 INFO    [req-bff50c18] medrag.access: POST /api/v1/qa/stream → 200  1.1ms
+2026-08-11 16:10:01 INFO    [req-bff50c18] medrag.qa: 流式问答完成｜1766 字｜2 次调用｜拒答=True｜33451.6ms
+2026-08-11 16:13:36 INFO    [req-f5110531] medrag.access: POST /api/v1/qa/stream → 200  1.0ms
+2026-08-11 16:13:56 INFO    [req-f5110531] medrag.qa: 流式问答完成｜1637 字｜1 次调用｜拒答=True｜20172.5ms
+2026-08-11 18:37:07 INFO    [-] uvicorn.error: Started server process [27308]
+2026-08-11 18:37:07 INFO    [-] uvicorn.error: Waiting for application startup.
+2026-08-11 18:37:07 WARNING [-] medrag.app: medrag-api v0.10.1 启动｜检索模式 live｜约束层 开｜并发上限 2｜鉴权 关
+2026-08-11 18:37:09 WARNING [-] medrag.app: 开始加载检索器（首次约 15.8GB 内存 + 数分钟）…
+2026-08-11 18:37:51 WARNING [-] medrag.app: 检索器就绪，用时 41.5s
+2026-08-11 18:37:51 WARNING [-] medrag.app: 生成流水线就绪，用时 43.9s（约束层 开）
+2026-08-11 18:37:58 WARNING [-] medrag.app: 预热：{'seconds': 51.08, 'pipeline_loaded': True, 'llm_warmup_seconds': 7.14, 'errors': []}
+2026-08-11 18:37:58 INFO    [-] uvicorn.error: Application startup complete.
+2026-08-11 18:37:58 INFO    [-] uvicorn.error: Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2026-08-11 18:44:22 INFO    [req-b2cf9708] medrag.access: GET /health/ready → 200  2048.9ms
+2026-08-11 18:44:22 INFO    [req-8fca0b89] medrag.access: GET /api/v1/qa/stats → 200  14.1ms
+2026-08-11 18:45:50 INFO    [req-2a2356ca] medrag.qa: 同步问答完成｜1869 字｜1 次调用｜拒答=False｜26824.7ms
+2026-08-11 18:45:50 INFO    [req-2a2356ca] medrag.access: POST /api/v1/qa/ask → 200  26830.4ms
+2026-08-11 18:46:25 INFO    [req-3d241063] medrag.qa: 同步问答完成｜1539 字｜2 次调用｜拒答=False｜35145.6ms
+2026-08-11 18:46:25 INFO    [req-3d241063] medrag.access: POST /api/v1/qa/ask → 200  35148.2ms
+2026-08-11 18:46:52 INFO    [req-75483992] medrag.qa: 同步问答完成｜1871 字｜1 次调用｜拒答=False｜26432.5ms
+2026-08-11 18:46:52 INFO    [req-75483992] medrag.access: POST /api/v1/qa/ask → 200  26435.0ms
+2026-08-11 18:47:29 INFO    [req-aba8d2c5] medrag.qa: 同步问答完成｜1987 字｜2 次调用｜拒答=False｜37030.5ms
+2026-08-11 18:47:29 INFO    [req-aba8d2c5] medrag.access: POST /api/v1/qa/ask → 200  37033.1ms
+2026-08-11 18:48:05 INFO    [req-11484952] medrag.qa: 同步问答完成｜1970 字｜2 次调用｜拒答=True｜35727.2ms
+2026-08-11 18:48:05 INFO    [req-11484952] medrag.access: POST /api/v1/qa/ask → 200  35729.9ms
+2026-08-11 18:49:02 INFO    [req-c594049c] medrag.qa: 同步问答完成｜1542 字｜2 次调用｜拒答=False｜36085.5ms
+2026-08-11 18:49:02 INFO    [req-c594049c] medrag.access: POST /api/v1/qa/ask → 200  36087.8ms
+2026-08-11 18:49:22 INFO    [req-6e30bde7] medrag.access: GET /health/ready → 200  2030.2ms
+2026-08-11 18:49:22 INFO    [req-34ec4427] medrag.access: GET /api/v1/errors → 200  1.1ms
+2026-08-11 18:49:57 INFO    [req-670e8cf4] medrag.qa: 同步问答完成｜1520 字｜2 次调用｜拒答=False｜34683.2ms
+2026-08-11 18:49:57 INFO    [req-670e8cf4] medrag.access: POST /api/v1/qa/ask → 200  34685.3ms
+2026-08-11 18:49:57 INFO    [req-58d71d3f] medrag.access: GET /api/v1/qa/logs/req-670e8cf4 → 200  1.8ms
+2026-08-11 18:49:57 INFO    [req-27908b4a] medrag.error: 参数校验失败 /api/v1/qa/ask → [1001] [{'field': 'query', 'message': 'Value error, query 不能为空或纯空白', 'type': 'value_error'}]
+2026-08-11 18:49:57 INFO    [req-27908b4a] medrag.access: POST /api/v1/qa/ask → 400  1.9ms
+2026-08-11 18:49:57 INFO    [req-9591a005] medrag.error: 参数校验失败 /api/v1/qa/ask → [1001] [{'field': 'query', 'message': 'Value error, query 长度不能超过 1000 字符，当前 1001', 'type': 'value_error'}]
+2026-08-11 18:49:57 INFO    [req-9591a005] medrag.access: POST /api/v1/qa/ask → 400  1.0ms
+2026-08-11 18:49:57 INFO    [req-522571ff] medrag.error: 参数校验失败 /api/v1/qa/ask → [1003] [{'field': 'top_k', 'message': 'Input should be less than or equal to 50', 'type': 'less_than_equal'}]
+2026-08-11 18:49:57 INFO    [req-522571ff] medrag.access: POST /api/v1/qa/ask → 400  1.4ms
+2026-08-11 18:49:57 INFO    [req-27627c78] medrag.error: 参数校验失败 /api/v1/qa/ask → [1002] [{'field': 'query', 'message': 'Field required', 'type': 'missing'}]
+2026-08-11 18:49:57 INFO    [req-27627c78] medrag.access: POST /api/v1/qa/ask → 400  1.2ms
+2026-08-11 18:49:57 INFO    [req-55ada31a] medrag.access: GET /api/v1/no-such-endpoint → 404  0.4ms
+2026-08-11 18:49:57 WARNING [req-90038d70] medrag.error: APIError GET /api/v1/sessions/not-exist → [3002] 会话不存在或已过期 {'session_id': 'not-exist'}
+2026-08-11 18:49:57 INFO    [req-90038d70] medrag.access: GET /api/v1/sessions/not-exist → 404  2.1ms
+2026-08-11 18:49:57 INFO    [req-76f59e12] medrag.access: POST /api/v1/qa/stream → 200  1.1ms
+2026-08-11 18:50:20 INFO    [req-76f59e12] medrag.qa: 流式问答完成｜1485 字｜1 次调用｜拒答=False｜23454.0ms
+2026-08-11 18:50:45 INFO    [req-f8c82d61] medrag.error: 参数校验失败 /api/v1/qa/ask → [1001] [{'field': 'query', 'message': 'Value error, query 不能为空或纯空白', 'type': 'value_error'}]
+2026-08-11 18:50:45 INFO    [req-f8c82d61] medrag.access: POST /api/v1/qa/ask → 400  2.6ms
+2026-08-11 18:50:45 INFO    [req-bbda2589] medrag.error: 参数校验失败 /api/v1/qa/ask → [1001] [{'field': 'query', 'message': 'Value error, query 长度不能超过 1000 字符，当前 1001', 'type': 'value_error'}]
+2026-08-11 18:50:45 INFO    [req-bbda2589] medrag.access: POST /api/v1/qa/ask → 400  1.7ms
+2026-08-11 18:50:45 INFO    [req-5441d346] medrag.access: POST /api/v1/qa/ask → 400  1.3ms
+2026-08-11 18:50:45 WARNING [req-ddf65c5c] medrag.error: APIError GET /api/v1/sessions/not-exist → [3002] 会话不存在或已过期 {'session_id': 'not-exist'}
+2026-08-11 18:50:45 INFO    [req-ddf65c5c] medrag.access: GET /api/v1/sessions/not-exist → 404  1.9ms
+2026-08-11 18:50:50 INFO    [req-5bab666f] medrag.qa: 同步问答完成｜1541 字｜2 次调用｜拒答=False｜30313.2ms
+2026-08-11 18:50:50 INFO    [req-5bab666f] medrag.access: POST /api/v1/qa/ask → 200  30316.9ms
+2026-08-11 18:50:53 INFO    [req-a3c44ed5] medrag.qa: 追问改写（llm）：'它有哪些局限？' → 'CRISPR-Cas9 的脱靶效应检测方法有哪些局限？'
+2026-08-11 18:51:01 INFO    [req-96a53445] medrag.error: 参数校验失败 /api/v1/qa/ask → [1003] [{'field': 'top_k', 'message': 'Input should be less than or equal to 50', 'type': 'less_than_equal'}]
+2026-08-11 18:51:01 INFO    [req-96a53445] medrag.access: POST /api/v1/qa/ask → 400  1.5ms
+2026-08-11 18:51:01 INFO    [req-28c0afcd] medrag.error: 参数校验失败 /api/v1/qa/ask → [1003] [{'field': 'top_k', 'message': 'Input should be less than or equal to 50', 'type': 'less_than_equal'}]
+2026-08-11 18:51:01 INFO    [req-28c0afcd] medrag.access: POST /api/v1/qa/ask → 400  2.0ms
+2026-08-11 18:51:27 INFO    [req-a3c44ed5] medrag.qa: 同步问答完成｜1477 字｜2 次调用｜拒答=False｜36761.8ms
+2026-08-11 18:51:27 INFO    [req-a3c44ed5] medrag.access: POST /api/v1/qa/ask → 200  36764.8ms
+2026-08-11 18:51:27 INFO    [req-2d262db8] medrag.access: GET /api/v1/sessions/demo-1786488560 → 200  1.1ms
+2026-08-11 18:51:27 INFO    [req-56aff47a] medrag.access: GET /api/v1/qa/logs → 200  2.7ms
+2026-08-11 18:51:27 INFO    [req-4ed33b0f] medrag.access: GET /api/v1/qa/stats → 200  0.9ms

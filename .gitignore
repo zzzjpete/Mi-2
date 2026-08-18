@@ -1,0 +1,67 @@
+# ── 大数据 / 环境 / 缓存：一律不进库（几十 GB，且可由脚本重建）──
+conda/
+data/
+hf-cache/
+ollama/
+pip-cache/
+logs/
+
+# ── Python 缓存 ──
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# ── 防误加的大二进制 / 生成物（正常都在 data/ 下，双保险）──
+*.parquet
+*.sqlite3
+*.sqlite
+*.db
+*.bin
+*.safetensors
+*.npy
+*.pkl
+*.index
+
+# ── 本地工作文档：不进公开仓库 ──
+工作记录.md
+汇报草稿.md
+上传审视内容/
+新建 Microsoft Word 文档.*
+# Word 打开文档时生成的锁文件（~$xxx.DOCX）——gitignore 不支持行尾注释，注释必须单独一行
+~$*
+
+# ── 中间产物 / 个人文件：不进公开仓库 ──
+report_data/
+resume*.docx
+# 个人笔记，不进公开仓库
+claude code 不用读这个文档.txt
+
+# ── 验收集（held-out）：新增一批就在这里显式写一行 ──
+# 规矩见 docs/工程笔记.md 二·9。要点：**不能靠「记得别 git add」来保密**——
+# 评测集一旦推上公开仓库就永久失去 held-out 资格，删掉也没用。
+# 已因进仓库而失效、降级为回归集的：
+#   · 任务10/检索评测改进/golden_set.jsonl（bb51974）
+#   · docs/medrag_改进任务清单.md 附录 A 的 5 道题（2f4783f，含参考答案与扣分触发词）
+# 新验收集放 report_data/（已整目录忽略）或仓库外；若非放这不可，在下面补文件名：
+holdout_*.jsonl
+holdout_*.json
+验收集_*.jsonl
+验收集_*.json
+
+# ── 服务配置：.env 里可能有 API Key，不进库；.env.example 要进 ──
+# 顺序不能反：先忽略 .env，再用 ! 把样例放行。
+.env
+.env.*
+!.env.example
+
+# ── 系统 ──
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# ── P0 landmark 集合：取回来的摘要正文不进公开仓库（版权归出版方）──
+# 种子清单（scripts/landmark_种子清单.json，只有 PMID）要进；正文与向量库不进。
+# data/ 整目录本来就已忽略，这里显式写一行是为了让规矩看得见。
+data/landmark/
+data/chroma_landmark/

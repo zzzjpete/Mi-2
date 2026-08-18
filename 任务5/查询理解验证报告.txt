@@ -1,0 +1,228 @@
+==============================================================================
+第五阶段 · 查询理解与增强 —— 质量验证报告
+生成时间：2026-08-16 19:27:28
+==============================================================================
+[词典] MeSH 26,694 主题词 / 107,944 词面
+
+==============================================================================
+① 功能自检（12 条查询，覆盖缩写/歧义/俗称/商品名/拼写/中文/时间/章节/无实体）
+==============================================================================
+  [ 1] ✓ Does MI risk increase in patients with CKD?                  … 缩写识别 + 歧义缩写生成多义项变体
+  [ 2] ✓ What is the effect of metformin on cardiovascular outcomes   … 正则药名 + 缩写全称展开
+  [ 3] ✓ Is Glucophage safe for elderly patients with impaired rena   … 商品名 → 通用名（MeSH 覆盖）
+  [ 4] ✓ heart attack prevention with aspirin, recent studies         … 俗称 → 术语；模糊时间词按启发式转过滤
+  [ 5] ✓ tumour haemorrhage after anti-VEGF therapy                   … 英式拼写归一 + 基因/蛋白识别
+  [ 6] ✓ RCT evidence for pembrolizumab in NSCLC published since 20   … 研究设计缩写 + since 年份下界
+  [ 7] ✓ What did studies between 2015 and 2018 report about gut mi   … 年份区间 → $and 双边界
+  [ 8] ✓ EGFR mutation and TKI resistance in lung cancer, in the re   … 章节过滤下推 $in（results 只需 24 种写法）
+  [ 9] ✓ cell culture protocols described in the methods section      … 章节过滤退化为后置过滤（methods 有 7726 种写法，$in 不现实）
+  [10] ✓ 二甲双胍对心血管疾病有何影响？                                              … 中文查询 → 英文术语（需求方给的示例查询）
+  [11] ✓ 近五年 CRISPR 基因编辑在肿瘤治疗中的应用                                     … 中文时间词必须在翻译前抽取，否则会被当未覆盖片段丢掉
+  [12] ✓ hello world                                                  … 非医学查询：不报错、优雅降级
+
+  → 自检结果：12/12 通过，0 失败
+
+[库] 加载 E:\rag\data\chroma_db_4m / medrag_bge_base ...
+[库] 向量数 3,998,000
+[模型] 加载 BAAI/bge-base-en-v1.5 (dim=768) 到 cuda ...
+
+==============================================================================
+② 过滤条件下推验证（生成的 where 子句真的丢给 Chroma 跑）
+==============================================================================
+
+  Q: RCT evidence for pembrolizumab in NSCLC published since 2020
+     where = {"pub_year": {"$gte": 2020}}
+     ✓ 返回 10 条；命中年份 [2020, 2021, 2022, 2023, 2024]
+       年份下界 2020：✓ 全部满足
+
+  Q: What did studies between 2015 and 2018 report about gut microbiota and obesity?
+     where = {"$and": [{"pub_year": {"$gte": 2015}}, {"pub_year": {"$lte": 2018}}]}
+     ✓ 返回 10 条；命中年份 [2016, 2017, 2018]
+       年份下界 2015：✓ 全部满足
+       年份上界 2018：✓ 全部满足
+
+  Q: EGFR mutation and TKI resistance in lung cancer, in the results section
+     where = {"section": {"$in": ["Results", "3. Results", "RESULTS", "Results and discussion", "Results and Discussion", "3. Results and Discussion", "2. Results"
+     ✓ 返回 10 条；命中年份 [2011, 2013, 2014, 2016, 2020, 2021, 2022, 2023]
+       命中章节 ['3. Results', 'Results', 'Results and Discussion']
+       在 $in 白名单内：✓ 全部满足
+       归一化章节：{'results'} → ✓ 同属一类
+
+  Q: 近五年 CRISPR 基因编辑在肿瘤治疗中的应用
+     where = {"pub_year": {"$gte": 2021}}
+     ✓ 返回 10 条；命中年份 [2021, 2022, 2023, 2024]
+       年份下界 2021：✓ 全部满足
+
+==============================================================================
+③ A/B：BGE 指令前缀  官方"sentence"（第四阶段建库/验证所用） vs 任务书"question"
+==============================================================================
+  两者只作用于查询侧（文档侧不加前缀），换前缀不会与既有索引冲突。
+  查询                                               sentence   question    top10重合
+  Does MI risk increase in patients with CKD?          0.20       0.20       100%
+  What is the effect of metformin on cardiovas         1.00       1.00       100%
+  RCT evidence for pembrolizumab in NSCLC              1.00       1.00        80%
+  EGFR mutation and TKI resistance in lung can         1.00       1.00        80%
+  Is Glucophage safe for patients with impaire         1.00       1.00        90%
+  heart attack prevention with aspirin                 1.00       1.00        90%
+  平均 term-hit@10                                       0.87       0.87        90%
+
+  结论：两版前缀平均 term-hit@10 差 0.000，top10 平均重合 90%。
+  → 差异在噪声量级。保持与第四阶段建库/验证一致的官方 "sentence" 版为默认，
+    任务书的 "question" 版通过 --instruction taskbook 可切换，二者可互换不影响索引。
+
+==============================================================================
+④ A/B：同义词扩展策略（本模块最关键的设计选择）
+==============================================================================
+  A 主查询       ：只用清洗后的原查询（不扩展）
+  B 单查询平铺   ：把同义词拼进同一条查询（直觉做法）
+  C 多查询+等权RRF：每个缩写义项各查一次，等权 RRF 融合
+  D 多查询+加权RRF：同上，但主查询在其缩写已被展开时降权到 0.5（本模块默认输出的权重）
+
+  ⚠ 指标偏差声明：term-hit@10 的目标术语【就是】同义词扩展项，
+    把扩展项塞进查询天然更容易命中它们，该指标对 B 有构造性偏袒。
+    因此下表只用于看「扩展有没有救回缩写查询」，不足以判定 B/C/D 孰优——
+    那需要第二部分带人工标注的相关性评测。
+
+  查询                                               A主查询      B平铺      C等权      D加权
+  Does MI risk increase in patients with CKD       0.20     0.70     0.40     0.40   (4条查询)
+  What is the effect of metformin on cardiov       1.00     1.00     1.00     1.00   (2条查询)
+  RCT evidence for pembrolizumab in NSCLC          1.00     1.00     1.00     1.00   (3条查询)
+  EGFR mutation and TKI resistance in lung c       1.00     1.00     1.00     1.00   (2条查询)
+  Is Glucophage safe for patients with impai       1.00     1.00     1.00     1.00   (1条查询)
+  heart attack prevention with aspirin             1.00     1.00     1.00     1.00   (1条查询)
+  平均 term-hit@10                                   0.87     0.95     0.90     0.90
+
+==============================================================================
+⑤ A/B：中文查询  直接检索 vs 中译英（索引是英文模型 bge-base-en-v1.5）
+==============================================================================
+
+  Q: 二甲双胍对心血管疾病有何影响？
+     译文: metformin cardiovascular disease effect
+     直接中文检索 term-hit@10 = 0.10   |   中译英后 = 1.00
+     直接中文 top1:
+      [1] sim=0.633  PMC8302391#0  (Evidence-based Complementary and Alternative Medicine : eCAM 2021 · Abstract)
+          《TaiChi and Qigong for Depressive Symptoms in Patients with Chronic Heart》
+          Background Depression is a debilitating comorbidity of heart failure (HF) that needs assessment and …
+     中译英  top1:
+      [1] sim=0.803  PMC9549498#2  (Journal of Cellular and Molecular Medicine 2022 · INTRODUCTION)
+          《Protective effects of metformin in various cardiovascular diseases: Clin》
+          8 In spite of the existence of AMPK‐independent action of metformin, it has been shown that metformin exerts …
+
+  Q: 肿瘤微环境在癌症免疫治疗中的作用
+     译文: tumor microenvironment cancer immunotherapy effect
+     直接中文检索 term-hit@10 = 0.00   |   中译英后 = 0.90
+     直接中文 top1:
+      [1] sim=0.796  PMC7519954#0  (Chinese Journal of Lung Cancer 2020 · Abstract)
+          《铁死亡的发生机制及其在肺癌中的研究进展》
+          …
+     中译英  top1:
+      [1] sim=0.804  PMC9271663#1  (Frontiers in Immunology 2022 · 1 Introduction)
+          《Development of Immunotherapy Strategies Targeting Tumor Microenvironment》
+          1 Introduction The tumor immune microenvironment (TIME) is a very complex system that is influenced by a …
+
+  Q: CRISPR 基因编辑的脱靶效应
+     译文: CRISPR gene editing
+     直接中文检索 term-hit@10 = 1.00   |   中译英后 = 1.00
+     直接中文 top1:
+      [1] sim=0.763  PMC9353945#1  (Frontiers in Pharmacology 2022 · Introduction)
+          《A Novel Anti-Cancer Therapy: CRISPR/Cas9 Gene Editing》
+          Introduction The clustered regularly interspaced short palindromic repeats (CRISPR)/-CRISPR-associated …
+     中译英  top1:
+      [1] sim=0.779  PMC9794862#2  (Frontiers in Molecular Neuroscience 2022 · Progress in Gene Editing Techniques)
+          《Gene editing in monogenic autism spectrum disorder: animal models and ge》
+          Progress in Gene Editing Techniques Gene editing is a genetic engineering technology that can modify, …
+
+  → 平均 term-hit@10：直接中文 0.37  vs  中译英 0.97
+
+==============================================================================
+⑥ 端到端样例：增强查询 + 元数据过滤的实际命中
+==============================================================================
+
+------------------------------------------------------------------------------
+原始查询   : 二甲双胍对心血管疾病有何影响？
+清洗后     : 二甲双胍对心血管疾病有何影响?
+中译英     : 二甲双胍对心血管疾病有何影响?  →  metformin cardiovascular disease effect  （dict）
+语言       : zh
+检索主体   : metformin cardiovascular disease effect
+医学实体   : ['metformin[drug/regex]']
+同义词扩展 :
+             metformin → ['dimethylbiguanidine', 'dimethylguanylguanidine', 'glucophage']
+过滤条件   : （无）
+向量查询   : 1 条（权重供检索层做加权 RRF）
+             [主 w=1] Represent this sentence for searching relevant passages: metformin cardiovascular disease effect
+关键词查询 : (metformin OR dimethylbiguanidine OR dimethylguanylguanidine OR glucophage) AND cardiovascular AND disease AND effect
+提示       :
+             · 中文词典未覆盖、已丢弃的片段：['对', '有何']（如影响结果，可开 --translate llm 用本地 qwen3:8b 整句翻译）
+  检索结果（多查询加权 RRF 融合后 top3）：
+      [1] sim=0.803  PMC9549498#2  (Journal of Cellular and Molecular Medicine 2022 · INTRODUCTION)
+          《Protective effects of metformin in various cardiovascular diseases: Clin》
+          8 In spite of the existence of AMPK‐independent action of metformin, it has been shown that metformin exerts …
+      [2] sim=0.783  PMC10459572#27  (Pharmaceuticals 2023 · 7. Perspectives and Conclusions)
+          《Effects of Metformin on Ischemia/Reperfusion Injury: New Evidence and Me》
+          The evidence in non-diabetics remains controversial, with multiple studies reporting little or no effect of …
+      [3] sim=0.782  PMC6486984#4  (Cardiovascular Diabetology 2019 · Cardiovascular effects of metformin: clinical scenario)
+          《Metformin in patients with and without diabetes: a paradigm shift in car》
+          A meta-analysis of 35 clinical RCTs confirmed the cardiovascular benefits of metformin in comparison to …
+
+------------------------------------------------------------------------------
+原始查询   : Does MI risk increase in patients with CKD?
+语言       : en
+检索主体   : Does MI risk increase in patients with CKD?
+医学实体   : ['MI[abbreviation/static] ⚠歧义', 'CKD[abbreviation/static]']
+同义词扩展 :
+             MI → ['myocardial infarction', 'heart attack', 'myocardial infarct']
+             CKD → ['chronic kidney disease']
+过滤条件   : （无）
+向量查询   : 4 条（权重供检索层做加权 RRF）
+             [主 w=0.5] Represent this sentence for searching relevant passages: Does MI risk increase in patients with CKD?
+             [变体1 w=1] Represent this sentence for searching relevant passages: Does myocardial infarction risk increase in patients with CKD?
+             [变体2 w=1] Represent this sentence for searching relevant passages: Does heart attack risk increase in patients with CKD?
+             [变体3 w=1] Represent this sentence for searching relevant passages: Does MI risk increase in patients with chronic kidney disease?
+关键词查询 : (mi OR "myocardial infarction" OR "heart attack" OR "myocardial infarct") AND (ckd OR "chronic kidney disease") AND risk AND increase AND patients
+  检索结果（多查询加权 RRF 融合后 top3）：
+      [1] sim=0.762  PMC9843852#19  (Diabetology & Metabolic Syndrome 2023 · Results)
+          《Effect of frailty, physical performance, and chronic kidney disease on m》
+          The presence of cardiovascular diseases, i.e., coronary artery disease, stroke, congestive heart failure, …
+      [2] sim=0.775  PMC8976374#23  (BMC Cardiovascular Disorders 2022 · Discussion)
+          《Temporal trends in treatment strategies and clinical outcomes among pati》
+          The importance of diabetes and hypertension in CKD could indirectly be confirmed in our results, since rates …
+      [3] sim=0.775  PMC4996629#11  (American Journal of Kidney Diseases 2016 · Discussion)
+          《Smoking and Adverse Outcomes in Patients With CKD: The Study of Heart an》
+          Discussion In this cohort of patients with CKD, smoking increased the risk for cardiovascular disease, …
+
+------------------------------------------------------------------------------
+原始查询   : RCT evidence for pembrolizumab in NSCLC published since 2020
+语言       : en
+检索主体   : RCT evidence for pembrolizumab in NSCLC published
+医学实体   : ['RCT[abbreviation/static]', 'pembrolizumab[drug/regex]', 'NSCLC[abbreviation/static]']
+同义词扩展 :
+             RCT → ['randomized controlled trial']
+             NSCLC → ['non-small cell lung carcinoma', 'non-small-cell lung carcinoma', 'non-small cell lung cancer']
+过滤条件   : {"pub_year": {"$gte": 2020}}
+过滤依据   : ["'since 2020' → pub_year ≥ 2020"]
+向量查询   : 3 条（权重供检索层做加权 RRF）
+             [主 w=0.5] Represent this sentence for searching relevant passages: RCT evidence for pembrolizumab in NSCLC published
+             [变体1 w=1] Represent this sentence for searching relevant passages: randomized controlled trial evidence for pembrolizumab in NSCLC published
+             [变体2 w=1] Represent this sentence for searching relevant passages: RCT evidence for pembrolizumab in non-small cell lung carcinoma published
+关键词查询 : (rct OR "randomized controlled trial") AND pembrolizumab AND (nsclc OR "non-small cell lung carcinoma" OR "non-small-cell lung carcinoma" OR "non-small cell lung cancer") AND evidence AND published
+  检索结果（多查询加权 RRF 融合后 top3）：
+      [1] sim=0.786  PMC9988982#17  (Scientific Reports 2023 · Methods)
+          《Pneumonitis associated with pembrolizumab plus chemotherapy for non-squa》
+          Methods Study design and patients This was a multicenter, retrospective, hospital-based cohort study of …
+      [2] sim=0.772  PMC8909459#0  (Cancers 2022 · Abstract)
+          《Comparative Effectiveness and Safety of Standard-Dose and Low-Dose Pembr》
+          Simple Summary The comparative effectiveness and safety of the standard dose and lower doses of …
+      [3] sim=0.766  PMC8300186#0  (Frontiers in Oncology 2021 · Abstract)
+          《A Network Meta-Analysis of Cancer Immunotherapies  Versus  Chemotherapy 》
+          In the absence of head-to-head trials of first-line treatments for metastatic non-small cell lung cancer …
+
+==============================================================================
+小结
+==============================================================================
+  ① 功能自检            ：✓ 全部通过
+  ② 过滤条件下推        ：✓ 全部生效且非空
+  ③ 指令前缀 sentence/question：0.87 / 0.87（term-hit@10，差异在噪声量级）
+  ④ 扩展 主/平铺/等权RRF/加权RRF：0.87 / 0.95 / 0.90 / 0.90（term-hit@10，指标对平铺有偏袒）
+  ⑤ 中文 直接/中译英    ：0.37 / 0.97（term-hit@10）
+
+[完成] 用时 656.0s -> E:\rag\report_data\查询理解验证报告.txt

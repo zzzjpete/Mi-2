@@ -1,0 +1,48 @@
+========================================================
+ 阶段六 · 检索系统开发第二部分：多路检索 + 重排序
+========================================================
+任务下达：2026-07-22 ｜ 原文补录：2026-07-31
+实现与逐条对照见 任务6/README.md「对照任务书」。
+
+--------------------------------------------------------
+
+检索系统开发第二部分：
+
+1应用多路检索（MultiPathRetriever）方法提升检索质量：
+    #检索初始化：向量检索 + 关键词检索（如BM25）
+    #构建BM25索引
+    #向量检索
+        ChromaDB需要将查询转换为嵌入向量
+    #关键词检索（BM25）
+        分词
+        计算BM25分数并获取top_k
+        生成格式化结果
+    #融合策略选择
+        简单合并去重（基本方法，但可能忽略排名信息）
+        RRF（学术检索适用）
+        加权融合（向量检索权重更高）
+        （可尝试其他融合策略）
+
+        Args:
+            query_info: 查询处理器输出的查询信息
+            top_k_vector: 向量检索返回数量
+            top_k_keyword: 关键词检索返回数量
+            fusion_strategy: 融合策略 ('rrf', 'weighted', 'simple')
+
+2 重排序器搭建（使用新模型，可考虑BAAI/bge-reranker-base）
+    对初步检索结果进行重排序，提升相关性
+        # 加载模型和tokenizer
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.model = AutoModelForSequenceClassification.from_pretrained(model_name)
+
+    # tokenize - 推理 - 转换为概率分数
+
+    使用模型进行多准则重排序，例如
+
+            criteria_weights = {
+                "relevance": 0.6,   # 相关性 - 基础要求
+                "recency": 0.25,    # 时效性 - 提取年份，随年份线性衰减
+                "authority": 0.15   # 权威性 - 按照期刊添加不同权重
+            }
+
+3 结合上周开发内容，完成完整的检索流水线

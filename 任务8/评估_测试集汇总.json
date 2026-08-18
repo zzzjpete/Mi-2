@@ -1,0 +1,418 @@
+{
+  "timestamp": "2026-08-03 20:03:21",
+  "snapshot_created": "2026-07-31 18:38:27",
+  "cases": 4,
+  "case_ids": [
+    "live-1",
+    "live-2",
+    "live-3",
+    "live-4"
+  ],
+  "environment": {
+    "cpu_count": 24,
+    "gen_workers": 4,
+    "eval_workers": 8,
+    "rouge_backend": "rouge-lib",
+    "model": "qwen3:8b",
+    "num_ctx": 12288,
+    "budget": 2400
+  },
+  "passes": [
+    {
+      "items": 4,
+      "workers": 1,
+      "kind": "llm",
+      "ok": 4,
+      "failed": 0,
+      "wall_seconds": 144.535,
+      "sum_task_seconds": 144.521,
+      "speedup_vs_serial": 1.0,
+      "cpu_count": 24,
+      "cache_hits": 0,
+      "name": "趟 1 · 串行（缓存已清空，冷启动）"
+    },
+    {
+      "items": 4,
+      "workers": 4,
+      "kind": "llm",
+      "ok": 4,
+      "failed": 0,
+      "wall_seconds": 106.367,
+      "sum_task_seconds": 363.929,
+      "speedup_vs_serial": 3.42,
+      "cpu_count": 24,
+      "cache_hits": 0,
+      "name": "趟 2 · 并行 4 线程（缓存已清空，冷启动）"
+    },
+    {
+      "items": 4,
+      "workers": 4,
+      "kind": "llm",
+      "ok": 4,
+      "failed": 0,
+      "wall_seconds": 0.002,
+      "sum_task_seconds": 0.0,
+      "speedup_vs_serial": 0.0,
+      "cpu_count": 24,
+      "cache_hits": 4,
+      "name": "趟 3 · 并行（缓存已预热，走流水线级缓存）"
+    }
+  ],
+  "serial_vs_parallel_speedup": 1.36,
+  "cache": {
+    "ttl_seconds": 604800,
+    "stage_max_temperature": 0.0,
+    "pipeline_max_temperature": 0.3,
+    "cold_wall_seconds": 106.367,
+    "hot_wall_seconds": 0.002,
+    "hot_hits": 4,
+    "model_seconds_saved": 360.8,
+    "speedup": 53183.5,
+    "answers_identical": "4/4",
+    "stage_cache": {
+      "hits": 0,
+      "misses": 16,
+      "skipped": 16,
+      "seconds_saved": 0.0,
+      "cache": {
+        "entries": 8,
+        "max_entries": 200,
+        "bytes": 55600,
+        "max_bytes": 67108864,
+        "mb": 0.053,
+        "ttl_seconds": 604800,
+        "max_temperature": 0.0,
+        "hit_rate": 0.0,
+        "hits": 0,
+        "misses": 16,
+        "sets": 16,
+        "skipped_temperature": 0,
+        "evicted_lru": 0,
+        "evicted_bytes": 0,
+        "expired": 0,
+        "seconds_saved": 0.0
+      }
+    },
+    "pipeline_cache": {
+      "entries": 4,
+      "max_entries": 200,
+      "bytes": 117765,
+      "max_bytes": 67108864,
+      "mb": 0.112,
+      "ttl_seconds": 604800,
+      "max_temperature": 0.3,
+      "hit_rate": 1.0,
+      "hits": 4,
+      "misses": 0,
+      "sets": 4,
+      "skipped_temperature": 0,
+      "evicted_lru": 0,
+      "evicted_bytes": 0,
+      "expired": 0,
+      "seconds_saved": 360.797
+    }
+  },
+  "evaluation": {
+    "reference_kind": "evidence",
+    "has_gold_refs": false,
+    "eval_seconds": 3.33,
+    "per_case": [
+      {
+        "case_id": "live-1",
+        "rouge_l_f": 0.12415856054355393,
+        "rouge_1_f": 0.12715033316883442,
+        "rouge_2_f": 0.04091539267930018,
+        "key_info_recall": 0.3157894736842105,
+        "key_info_per_category": {
+          "percentage": {
+            "overlap": 0,
+            "gt": 5,
+            "recall": 0.0
+          },
+          "dosage": {
+            "overlap": 1,
+            "gt": 2,
+            "recall": 0.5
+          },
+          "duration": {
+            "overlap": 0,
+            "gt": 0,
+            "recall": null
+          },
+          "safety": {
+            "overlap": 1,
+            "gt": 3,
+            "recall": 0.3333333333333333
+          },
+          "recommendation": {
+            "overlap": 0,
+            "gt": 1,
+            "recall": 0.0
+          },
+          "mechanism": {
+            "overlap": 4,
+            "gt": 8,
+            "recall": 0.5
+          },
+          "statistic": {
+            "overlap": 0,
+            "gt": 0,
+            "recall": null
+          }
+        },
+        "hallucination_risk": 0.2331,
+        "hallucination_level": "中",
+        "signals_total": 1,
+        "signals_unmitigated": 1,
+        "by_signal": {
+          "vague_citation": 1
+        },
+        "readability_score": 0.7246,
+        "avg_sentence_length": 68.22,
+        "sentences": 27,
+        "mixed_language_ratio": 0.4074,
+        "chars": 1884
+      },
+      {
+        "case_id": "live-2",
+        "rouge_l_f": 0.14676033988644469,
+        "rouge_1_f": 0.15300546088566408,
+        "rouge_2_f": 0.05062362145173879,
+        "key_info_recall": 0.19444444444444445,
+        "key_info_per_category": {
+          "percentage": {
+            "overlap": 0,
+            "gt": 13,
+            "recall": 0.0
+          },
+          "dosage": {
+            "overlap": 1,
+            "gt": 6,
+            "recall": 0.16666666666666666
+          },
+          "duration": {
+            "overlap": 0,
+            "gt": 4,
+            "recall": 0.0
+          },
+          "safety": {
+            "overlap": 0,
+            "gt": 2,
+            "recall": 0.0
+          },
+          "recommendation": {
+            "overlap": 2,
+            "gt": 4,
+            "recall": 0.5
+          },
+          "mechanism": {
+            "overlap": 4,
+            "gt": 5,
+            "recall": 0.8
+          },
+          "statistic": {
+            "overlap": 0,
+            "gt": 2,
+            "recall": 0.0
+          }
+        },
+        "hallucination_risk": 0.0,
+        "hallucination_level": "低",
+        "signals_total": 0,
+        "signals_unmitigated": 0,
+        "by_signal": {},
+        "readability_score": 0.6798,
+        "avg_sentence_length": 76.91,
+        "sentences": 33,
+        "mixed_language_ratio": 0.3939,
+        "chars": 2597
+      },
+      {
+        "case_id": "live-3",
+        "rouge_l_f": 0.15770608974114933,
+        "rouge_1_f": 0.17204300730387334,
+        "rouge_2_f": 0.04578563717366728,
+        "key_info_recall": 0.22580645161290322,
+        "key_info_per_category": {
+          "percentage": {
+            "overlap": 0,
+            "gt": 4,
+            "recall": 0.0
+          },
+          "dosage": {
+            "overlap": 0,
+            "gt": 7,
+            "recall": 0.0
+          },
+          "duration": {
+            "overlap": 0,
+            "gt": 4,
+            "recall": 0.0
+          },
+          "safety": {
+            "overlap": 0,
+            "gt": 3,
+            "recall": 0.0
+          },
+          "recommendation": {
+            "overlap": 4,
+            "gt": 6,
+            "recall": 0.6666666666666666
+          },
+          "mechanism": {
+            "overlap": 3,
+            "gt": 7,
+            "recall": 0.42857142857142855
+          },
+          "statistic": {
+            "overlap": 0,
+            "gt": 0,
+            "recall": null
+          }
+        },
+        "hallucination_risk": 0.0,
+        "hallucination_level": "低",
+        "signals_total": 0,
+        "signals_unmitigated": 0,
+        "by_signal": {},
+        "readability_score": 0.7022,
+        "avg_sentence_length": 77.06,
+        "sentences": 32,
+        "mixed_language_ratio": 0.375,
+        "chars": 2514
+      },
+      {
+        "case_id": "live-4",
+        "rouge_l_f": 0.15256797210357712,
+        "rouge_1_f": 0.1631419902304653,
+        "rouge_2_f": 0.05938493849592201,
+        "key_info_recall": 0.22580645161290322,
+        "key_info_per_category": {
+          "percentage": {
+            "overlap": 0,
+            "gt": 4,
+            "recall": 0.0
+          },
+          "dosage": {
+            "overlap": 0,
+            "gt": 1,
+            "recall": 0.0
+          },
+          "duration": {
+            "overlap": 0,
+            "gt": 2,
+            "recall": 0.0
+          },
+          "safety": {
+            "overlap": 1,
+            "gt": 6,
+            "recall": 0.16666666666666666
+          },
+          "recommendation": {
+            "overlap": 3,
+            "gt": 6,
+            "recall": 0.5
+          },
+          "mechanism": {
+            "overlap": 2,
+            "gt": 7,
+            "recall": 0.2857142857142857
+          },
+          "statistic": {
+            "overlap": 1,
+            "gt": 5,
+            "recall": 0.2
+          }
+        },
+        "hallucination_risk": 0.0,
+        "hallucination_level": "低",
+        "signals_total": 0,
+        "signals_unmitigated": 0,
+        "by_signal": {},
+        "readability_score": 0.6729,
+        "avg_sentence_length": 80.14,
+        "sentences": 35,
+        "mixed_language_ratio": 0.4,
+        "chars": 2869
+      }
+    ],
+    "rag_aggregate": {
+      "cases": 4,
+      "rouge_1_f": 0.1538,
+      "rouge_2_f": 0.0492,
+      "rouge_l_f": 0.1453,
+      "key_info_recall": 0.2405,
+      "key_info_recall_taskbook_6": 0.2446,
+      "hallucination_risk": 0.0583,
+      "hallucination_signals_unmitigated": 1,
+      "hallucination_by_signal": {
+        "vague_citation": 1
+      },
+      "readability_score": 0.6949,
+      "avg_sentence_length": 75.5825,
+      "mixed_language_ratio": 0.3941,
+      "reference_kinds": [
+        "evidence"
+      ]
+    },
+    "bare_aggregate": {
+      "cases": 4,
+      "rouge_1_f": 0.1271,
+      "rouge_2_f": 0.0268,
+      "rouge_l_f": 0.1219,
+      "key_info_recall": 0.0846,
+      "key_info_recall_taskbook_6": 0.0866,
+      "hallucination_risk": 0.0437,
+      "hallucination_signals_unmitigated": 1,
+      "hallucination_by_signal": {
+        "vague_citation": 1
+      },
+      "readability_score": 0.8096,
+      "avg_sentence_length": 66.96,
+      "mixed_language_ratio": 0.0568,
+      "reference_kinds": [
+        "evidence"
+      ]
+    },
+    "bare_cases": 4
+  },
+  "checks": [
+    {
+      "label": "并行趟四道题全部成功（4/4）",
+      "passed": true
+    },
+    {
+      "label": "批量输出顺序与输入一致（逐条核对 index）",
+      "passed": true
+    },
+    {
+      "label": "热缓存趟全部命中（4/4）",
+      "passed": true
+    },
+    {
+      "label": "缓存命中返回的答案与首次逐字相同",
+      "passed": true
+    },
+    {
+      "label": "缓存命中后墙钟显著下降（106.4s → 0.00s）",
+      "passed": true
+    },
+    {
+      "label": "阶段级缓存只收下了温度 0 的调用（写入 16，因高温跳过 16）",
+      "passed": true
+    },
+    {
+      "label": "每份答案都拿到四个维度的分数（4 份）",
+      "passed": true
+    },
+    {
+      "label": "RAG 对证据的贴合度高于裸模型（ROUGE-L 0.1453 vs 0.1219）",
+      "passed": true
+    },
+    {
+      "label": "RAG 的关键信息召回高于裸模型（0.2405 vs 0.0846）",
+      "passed": true
+    }
+  ],
+  "failed": 0
+}

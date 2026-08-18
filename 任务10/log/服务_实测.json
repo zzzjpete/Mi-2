@@ -1,0 +1,192 @@
+{
+  "model": "qwen3:8b",
+  "port": 54878,
+  "queries": [
+    {
+      "query": "CRISPR-Cas9 的脱靶效应有哪些检测方法？请给出证据出处。",
+      "sync": {
+        "http": 200,
+        "seconds": 47.43,
+        "answer_chars": 1709,
+        "llm_calls": 5,
+        "prompt_tokens": 25776,
+        "output_tokens": 2934,
+        "refused": false,
+        "sources": 6,
+        "compliant": true,
+        "violations": [
+          "terminology.unknown_abbrev"
+        ],
+        "repair_rounds": 1,
+        "pool": "live-1"
+      },
+      "stream": {
+        "seconds": 35.03,
+        "deltas": 1385,
+        "first_event_at": {
+          "meta": 0.01,
+          "sources": 0.03,
+          "stage": 0.03,
+          "delta": 7.9,
+          "check": 35.03,
+          "done": 35.03
+        },
+        "events": 1399,
+        "answer_chars": 1351,
+        "llm_calls": 5,
+        "refused": false,
+        "compliant": true,
+        "violations": [
+          "terminology.unknown_abbrev"
+        ]
+      }
+    },
+    {
+      "query": "酶替代治疗用于法布里病的疗效证据有哪些？",
+      "sync": {
+        "http": 200,
+        "seconds": 43.57,
+        "answer_chars": 1845,
+        "llm_calls": 4,
+        "prompt_tokens": 20408,
+        "output_tokens": 2319,
+        "refused": false,
+        "sources": 6,
+        "compliant": true,
+        "violations": [
+          "terminology.unknown_abbrev"
+        ],
+        "repair_rounds": 0,
+        "pool": "live-2"
+      },
+      "stream": {
+        "seconds": 32.64,
+        "deltas": 1059,
+        "first_event_at": {
+          "meta": 0.04,
+          "sources": 0.04,
+          "stage": 0.04,
+          "delta": 8.38,
+          "check": 32.63,
+          "done": 32.63
+        },
+        "events": 1071,
+        "answer_chars": 1675,
+        "llm_calls": 4,
+        "refused": false,
+        "compliant": true,
+        "violations": [
+          "terminology.unknown_abbrev"
+        ]
+      }
+    },
+    {
+      "query": "抗淀粉样蛋白单抗治疗阿尔茨海默病的最新证据是什么？",
+      "sync": {
+        "http": 200,
+        "seconds": 38.84,
+        "answer_chars": 1973,
+        "llm_calls": 4,
+        "prompt_tokens": 20415,
+        "output_tokens": 2695,
+        "refused": false,
+        "sources": 6,
+        "compliant": true,
+        "violations": [
+          "terminology.unknown_abbrev"
+        ],
+        "repair_rounds": 0,
+        "pool": "live-4"
+      },
+      "stream": {
+        "seconds": 36.0,
+        "deltas": 1295,
+        "first_event_at": {
+          "meta": 0.01,
+          "sources": 0.03,
+          "stage": 0.03,
+          "delta": 7.77,
+          "check": 35.99,
+          "done": 36.0
+        },
+        "events": 1307,
+        "answer_chars": 2037,
+        "llm_calls": 4,
+        "refused": false,
+        "compliant": true,
+        "violations": []
+      }
+    }
+  ],
+  "created": "2026-08-14 16:01:56",
+  "stats": {
+    "total": 6,
+    "by_status": {
+      "ok": 6
+    },
+    "by_code": {
+      "0": 6
+    },
+    "by_mode": {
+      "sync": 3,
+      "stream": 3
+    },
+    "success_rate": 1.0,
+    "refusal_rate": 0.0,
+    "compliant_rate": 1.0,
+    "elapsed_ms": {
+      "avg": 38901.34,
+      "p50": 35986.46,
+      "p95": 47410.98,
+      "max": 47410.98
+    },
+    "tokens": {
+      "prompt": 132106,
+      "output": 14840,
+      "llm_calls": 26
+    },
+    "window": "全部",
+    "index": {
+      "available": true,
+      "total_documents": 2274167,
+      "total_chunks": 3998000,
+      "documents_note": "被抽中至少一块的文献数。4M 索引是从 92,432,502 块里按**块**分层抽样得到的，不是按文献抽——所以这不等于「227 万篇完整文献在库里」",
+      "index_size_bytes": 74021683071,
+      "index_size_human": "68.9 GB",
+      "index_size_detail": {
+        "vector_db": {
+          "bytes": 69345384860,
+          "human": "64.6 GB",
+          "files": 6,
+          "path": "E:\\rag\\data\\chroma_db_4m",
+          "exists": true
+        },
+        "bm25_index": {
+          "bytes": 3550553571,
+          "human": "3.3 GB",
+          "files": 7,
+          "path": "E:\\rag\\data\\bm25_index_4m",
+          "exists": true
+        },
+        "doc_catalog": {
+          "bytes": 1125744640,
+          "human": "1.0 GB",
+          "files": 1,
+          "path": "E:\\rag\\data\\docs_catalog.db",
+          "exists": true
+        },
+        "total_human": "68.9 GB"
+      },
+      "incremental_updates": 0,
+      "incremental_updates_note": "当前语料是 2026-06-18 冻结快照，一次全量构建，没有增量更新机制，因此该计数恒为 0；重建索引请跑 恢复_重建库.py / 检索_构建BM25索引.py",
+      "last_index_built_at": {
+        "vector_db": "2026-07-16T17:02:42",
+        "bm25_index": "2026-07-22T14:09:58",
+        "doc_catalog": "2026-08-14 15:26:55"
+      },
+      "corpus_snapshot": "PubMed Central oa_comm baseline 2026-06-18",
+      "computed_at": "2026-08-14 15:26:55",
+      "detail": "E:\\rag\\data\\index_stats.json（算于 2026-08-14 15:26:55）"
+    }
+  }
+}

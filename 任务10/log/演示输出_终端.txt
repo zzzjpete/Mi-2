@@ -1,0 +1,180 @@
+
+══════════════════════════════════════════════════════════════════════════
+【1】健康检查：存活探针与就绪探针分开
+对应任务书：1 · 配置日志和健康检查
+══════════════════════════════════════════════════════════════════════════
+GET /health          → code=0　message=ok　{'status': 'ok', 'version': '0.10.1', 'uptime_seconds': 733.0}
+存活探针不碰任何下游——探针一旦依赖下游，下游抖动就会把好好的进程重启掉。
+
+服务状态 ok｜检索模式 live｜模型 qwen3:8b｜并发上限 2
+  ✓ call_log_db          E:\rag\data\service\api_calls.db
+  ✓ session_db           E:\rag\data\service\sessions.db
+  ✓ logging              E:\rag\logs\service（INFO）
+  ✓ retrieval:live       BM25 索引 E:\rag\data\bm25_index_4m｜检索器已加载
+  ✓ llm:ollama           模型 qwen3:8b 已就绪
+
+
+══════════════════════════════════════════════════════════════════════════
+【2】错误码枚举
+对应任务书：1 · 定义错误码枚举（1001/2001/3001/4001 等）
+══════════════════════════════════════════════════════════════════════════
+共 21 个码，分 6 族：
+      0  OK                   HTTP 200  ok
+   1001  PARAM_INVALID        HTTP 400  参数错误
+   1002  PARAM_MISSING        HTTP 400  缺少必填参数
+   1003  PARAM_OUT_OF_RANGE   HTTP 400  参数超出允许范围
+   1004  BODY_MALFORMED       HTTP 400  请求体格式错误
+   2001  AUTH_FAILED          HTTP 401  认证失败
+   3001  DOC_NOT_FOUND        HTTP 404  文档或资源不存在
+   3002  SESSION_NOT_FOUND    HTTP 404  会话不存在或已过期
+   4001  MODEL_CALL_FAILED    HTTP 502  模型调用失败
+   4002  MODEL_TIMEOUT        HTTP 504  模型调用超时
+   5001  INTERNAL_ERROR       HTTP 500  服务内部错误
+   5003  SERVICE_BUSY         HTTP 503  服务繁忙，已达并发上限
+
+══════════════════════════════════════════════════════════════════════════
+【3】统一响应格式 + 同步问答 + 集成 RAG 流水线
+对应任务书：1 · 统一响应模型 ResponseModel　2 · 同步接口、集成RAG流水线
+══════════════════════════════════════════════════════════════════════════
+提问：CRISPR-Cas9 的脱靶效应有哪些检测方法？
+
+响应外层（所有接口同一个形状）
+  code         0
+  message      ok
+  request_id   req-670e8cf4
+  timestamp    2026-08-11 18:49:57
+  elapsed_ms   34683.16
+  data         …（下面展开）
+
+data 里有什么
+  答案 1520 字，出处 6 条，拒答=False，层D合规=True
+  引用校验 {'used': ['S1', 'S2', 'S3', 'S4', 'S5', 'S6'], 'available': ['S1', 'S2', 'S3', 'S4', 'S5', 'S6'], 'fabricated': [], 'has_citation': True}
+  耗时 34.7s，模型调用 2 次
+
+══════════════════════════════════════════════════════════════════════════
+【4】同一个 request_id 在响应体、日志、数据库三处一致
+对应任务书：2 · 记录每次调用的请求ID、耗时、结果状态（用于后续统计）
+══════════════════════════════════════════════════════════════════════════
+上一步响应体里的 request_id：req-670e8cf4
+数据库里查同一个 ID：
+  request_id     req-670e8cf4
+  created_at     2026-08-11 18:49:57
+  mode           sync
+  status         ok
+  code           0
+  elapsed_ms     34683.16
+  llm_calls      2
+  prompt_tokens  10374
+  output_tokens  1003
+  answer_chars   1520
+  refused        False
+  compliant      True
+服务端日志里同一个 ID 的行见 logs\service\api.log（录屏时同屏展示）。
+
+══════════════════════════════════════════════════════════════════════════
+【5】参数校验与全局异常处理
+对应任务书：1 · 全局异常处理器　2 · query 非空且长度限制、top_k 范围检查
+══════════════════════════════════════════════════════════════════════════
+  query 为纯空白         → code=1001 参数错误
+                       {"errors": [{"field": "query", "message": "Value error, query 不能为空或纯空白", "type": "value_error"}]}
+  query 超长（1001 字）   → code=1001 参数错误
+                       {"errors": [{"field": "query", "message": "Value error, query 长度不能超过 1000 字符，当前 1001", "type": "value_error"}]}
+  top_k 超出范围         → code=1003 参数超出允许范围
+                       {"errors": [{"field": "top_k", "message": "Input should be less than or equal to 50", "type": "less_than_equal"}]}
+  缺必填参数 query        → code=1002 缺少必填参数
+                       {"errors": [{"field": "query", "message": "Field required", "type": "missing"}]}
+  访问不存在的路径           → code=3001 接口或资源不存在：GET /api/v1/no-such-endpoint
+  会话不存在              → code=3002 会话不存在或已过期
+                       {"session_id": "not-exist"}
+
+未知异常一律 5001，日志留全栈、响应体只给一句话——把未知异常伪装成已知码，会让线上真 bug 藏在一个看起来正常的 4xxx 里。
+
+══════════════════════════════════════════════════════════════════════════
+【6】流式接口：出处先到，答案逐字
+对应任务书：2 · 实现流式接口
+══════════════════════════════════════════════════════════════════════════
+提问：CRISPR-Cas9 的脱靶效应有哪些检测方法？
+
+
+▎依据以下 6 篇文献作答
+  [S1] Engineering of Cas12a nuclease variants with enhanced genome-editing sp…
+       PLOS Biology · 2024 · PMC10965058
+  [S2] crisprSQL: a novel database platform for CRISPR/Cas off-target cleavage…
+       Nucleic Acids Research · 2021 · PMC7778913
+  [S3] Challenges of Gene Editing Therapies for Genodermatoses
+       International Journal of Molecular Sciences · 2023 · PMC9916788
+  [S4] Improving CRISPR–Cas9 directed faithful transgene integration outcomes …
+       Journal of Biomedical Science · 2024 · PMC10964699
+  [S5] HyCas9-12aGEP: an efficient genome editing platform for  Corynebacteriu…
+       Frontiers in Bioengineering and Biotechnology · 2024 · PMC10963414
+  [S6] Predicting CRISPR-Cas12a guide efficiency for targeting using machine l…
+       PLOS ONE · 2023 · PMC10581463
+
+## 核心答案
+CRISPR-Cas9 的脱靶效应检测方法包括 GUIDE-seq [S1]、in vivo EGFP 突变实验 [S1]、以及基于生物信息学的预测工具如 CRISPOR [S3]。现有文献未明确提及所有可能的检测方法。
+
+## 证据总结
+- GUIDE-seq 是一种广泛使用的检测方法，能够识别基因组编辑后的真实切割位点，具有高灵敏度和广泛适用性 [S1]。
+- in vivo EGFP 突变实验用于进一步验证 AsCas12aWT 的脱靶效应，特别是在双碱基错配情况下 [S1]。
+- CRISPOR 是一种基于“切割频率确定”算法的预测工具，能够对潜在脱靶位点进行排序和筛选 [S3]。
+- 有研究提到使用 T7 内切酶 assay 等第一代方法，但这些方法仅能检测预先定义的脱靶位点，信息有限 [S2]。
+
+## 证据强度与局限
+证据主要来源于实验研究和生物信息学分析，其中 GUIDE-seq 和 in vivo 实验提供了直接的脱靶效应检测证据，而 CRISPOR 等预测工具则提供了辅助分析手段。文献未覆盖所有可能的检测方法，且部分方法（如 T7 内切酶 assay）仅能提供有限信息。涉及具体用药或个体化处置时，需由临床医师结合患者情况判断。
+
+各事件首次出现的时刻
+  meta         0.00s
+  stage       11.77s
+  sources     11.77s  ← 出处比第一个字早 8.3 秒
+  delta       20.11s
+  check       23.45s
+  done        23.46s
+  共 305 个增量事件
+
+══════════════════════════════════════════════════════════════════════════
+【7】会话管理：追问被改写成可独立检索的问题
+对应任务书：2 · 若传入 session_id，则关联历史对话
+══════════════════════════════════════════════════════════════════════════
+会话 ID：demo-1786488560
+
+第一轮：CRISPR-Cas9 的脱靶效应有哪些检测方法？
+第二轮（追问，句子本身检索不到任何东西）：它有哪些局限？
+
+  原始问题     它有哪些局限？
+  改写后检索式  CRISPR-Cas9 的脱靶效应检测方法有哪些局限？
+  带入历史轮数  2　是否改写 True
+  会话里已存 4 条消息
+
+⚠ 历史只用于改写检索式，一个字都不进证据区——把上轮问答原文拼进上下文，等于给模型一段没有出处的事实材料。
+
+══════════════════════════════════════════════════════════════════════════
+【8】调用记录分页与聚合统计
+对应任务书：2 · 记录…（用于后续统计）
+══════════════════════════════════════════════════════════════════════════
+分页字段：total=16 page=1 page_size=5 pages=4 has_next=True has_prev=False
+  2026-08-11 18:51:27  req-a3c44ed5  sync   ok       36762ms  它有哪些局限？
+  2026-08-11 18:50:50  req-5bab666f  sync   ok       30313ms  CRISPR-Cas9 的脱靶效应有哪些检测方法？
+  2026-08-11 18:50:20  req-76f59e12  stream ok       23454ms  CRISPR-Cas9 的脱靶效应有哪些检测方法？
+  2026-08-11 18:49:57  req-670e8cf4  sync   ok       34683ms  CRISPR-Cas9 的脱靶效应有哪些检测方法？
+  2026-08-11 18:49:02  req-c594049c  sync   ok       36085ms  帕博利珠单抗治疗非小细胞肺癌有哪些随机对照试验证据？
+
+聚合 共 16 次｜成功率 1.0｜拒答率 0.375｜层D合规率 0.8125
+  耗时 avg 33094.46ms / p50 33451.56 / p95 37030.49 / max 58252.76
+  token in 145275 / out 14842｜模型调用 29 次
+
+══════════════════════════════════════════════════════════════════════════
+演示完毕 —— 任务书要求覆盖情况
+══════════════════════════════════════════════════════════════════════════
+  ✓ 1 健康检查           /health 与 /health/ready 分开，组件逐项可见
+  ✓ 1 错误码枚举          21 个码，GET /api/v1/errors 可查
+  ✓ 1 统一响应格式         code/message/data/detail/request_id/timestamp/elapsed_ms
+  ✓ 2 同步接口           POST /qa/ask，34.7s 返回带出处的答案
+  ✓ 2 调用记录           请求ID/耗时/状态/token/拒答/合规 全部落库，可按 ID 查回
+  ✓ 1 全局异常处理         1001/1002/1003/3001/3002 各归其位，响应体形状不变
+  ✓ 2 参数校验           空 query→1001，超长 query→1001，top_k 越界→1003，缺参→1002
+  ✓ 2 流式接口           SSE 七种事件；出处 11.77s，首字 20.11s
+  ✓ 2 会话管理           传 session_id 后追问被改写：CRISPR-Cas9 的脱靶效应检测方法有哪些局限？
+  ✓ 1 分页模型           items/total/page/page_size/pages/has_next/has_prev
+
+服务端日志：E:\rag\logs\service\api.log　调用记录：& $py 服务_日志.py --export <路径>
+

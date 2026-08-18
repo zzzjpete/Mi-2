@@ -1,0 +1,156 @@
+========================================================
+ 阶段七 · 生成模块与提示词工程（两部分）
+========================================================
+任务下达：之一 2026-07-27 ／ 之二 2026-07-31 ｜ 原文补录：2026-07-31
+实现与逐条对照见 任务7/README.md
+      「一、对照任务书（第一部分）」与「一之二、对照任务书（第二部分）」。
+
+========================================================
+【第一部分】上下文组装器 + 医学提示工程模板
+========================================================
+
+生成模块与提示词工程第一部分：
+
+1 完成上下文组装器
+
+    定义文档块数据类
+    @dataclass
+    class DocumentChunk:
+            text: str
+            metadata: Dict[str, Any]
+            relevance_score: float
+            source: str
+            chunk_id: str
+
+    定义上下文组装器
+    class ContextAssembler：
+        #加载tokenizer
+        #估算文本token数量
+        #组装上下文
+            转换文档格式（DocumentChunk）
+            计算文本相似性并去重（可使用Jaccard相似性判断）
+            按照相关性排序
+            优先选择高相关性文档，并考虑多样化（如果已经有太多来自同一来源的文档，降低优先级）
+            构建上下文字符串并减产长度限制（确保在完整段落处截断，如在后10%文本中找到句号）
+            补充元数据：
+                context_metadata = {
+                        "total_chunks_retrieved": len(retrieved_docs),
+                        "unique_chunks_after_dedup": len(unique_chunks),
+                        "chunks_selected": len(selected_chunks),
+                        "estimated_tokens": self.estimate_tokens(final_context),
+                        "chunk_sources": self._analyze_sources(selected_chunks)
+                }
+        返回结果：
+        return {
+                    "context_text": final_context,
+                    "metadata": context_metadata,
+                    "selected_chunks": selected_chunks
+                }
+
+2 完成医学提示工程模板
+    @dataclass
+    class PromptStage:
+            name: str
+            system_prompt: str
+            user_prompt_template: str
+            temperature: float
+            max_tokens: int
+
+
+    可参考的提示词结构：
+        "evidence_evaluator": PromptStage(
+                    name="证据评估器",
+            ...
+            temperature
+            max_tokens
+        ),
+        "answer_generator": PromptStage(
+                    name="答案生成器",
+            ....
+            temperature
+            max_tokens
+        ),
+        "critical_reviewer": PromptStage(
+                    name="批判性审查器",
+            ....
+            temperature
+            max_tokens
+        ),
+        "final_assembler": PromptStage(
+                    name="最终组装器",
+            ....
+            temperature
+            max_tokens
+
+
+========================================================
+【第二部分】本地 LLM 集成与完整生成流程
+========================================================
+
+生成模块与提示词工程第二部分：
+
+1 本地LLM集成与生成
+
+class LLMGenerator:
+
+        Args:
+            model_name: Ollama模型名称
+            base_url: Ollama服务地址
+            timeout: 请求超时时间（秒）
+
+    #初始化并测试链接
+        #温度和token数
+
+    #生成方法
+        # 使用prompt，（+system prompt），temperature，max_tokens构建完整提示
+        # 根据模型格式添加系统提示，并添加Json格式要求
+        # 从文本中提取json部分，并编辑格式（添加缺失符号）
+
+    #批量生成
+
+
+2 整合所有组件，完成生成流程
+
+class MedicalGenerationPipeline:
+
+    #初始化组件（上下文，医学模板，LLM生成）
+
+    # 1. 上下文组装
+    # 2. 检索结果评估（可选）
+        # 填充提示模板并生成评估
+        # 使用评估结果筛选上下文
+            基于文档id筛选，检测文档标题行等
+    # 3. 提取评估结果并生成答案草稿
+    # 4. 批判性审查（可选）
+    # 5. 生成最终答案
+        如果成功审查，使用审查结果
+        如果没有审查，直接使用草稿
+    # 6. 生成后处理
+        添加引用标记，添加格式美化，免责声明
+    # 组装最终结果
+    result = {
+            "query":
+            "answer":
+            "context_metadata": context_result["metadata"],
+            "generation_metrics": {
+                "total_time_seconds":
+                "stage_times":
+                "token_counts":
+                "stage_success":
+            },
+            "intermediate_results": {
+                "evidence_evaluation":
+                "draft_answer":
+                "review_feedback":
+            },
+            "sources": self._format_sources(context_result["selected_chunks"]),
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+        }
+
+    # 计算总时间
+
+3. 测试完整流程
+    编写测试query
+    完善答案显示和统计信息，log测试query结果以及相关引用来源
+    log每次生成的关键指标
+        耗时，答案长度，阶段

@@ -1,0 +1,77 @@
+========================================================
+ 阶段三 · 文档解析与分割
+========================================================
+任务下达：2026-07-09 ｜ 原文补录：2026-07-31
+实现与逐条对照见 任务3/README.md「对照任务书」。
+
+--------------------------------------------------------
+
+文档解析与分割工作
+
+输入PubMed数据集
+根据上周制定的报告中的策略，将每篇文献解析并分割成适合向量化和检索的文本单元。
+输出包含所有文本块及其元数据（如来源文献ID、块序号等）的数据集或文件
+
+1环境准备与数据加载
+    dataframe转换
+    基础清洗
+    为每篇文献生成唯一标识id（如果原始数据没有合适id）（pmid）
+
+2实施制定的文本分割策略
+    a 根据长度进行智能分割（如源数据）：
+        加载tokenizer
+        初始化分割器
+        length_function=self._count_tokens
+        为每个块生成唯一ID
+
+            chunk_data = {
+                "chunk_id": chunk_id,
+                "text": text,
+                "doc_id": document['doc_id'],      # 归属的原文ID
+                "chunk_index": i,                          # 块在原文中的序号
+                "total_chunks": len(texts),            # 原文被分成的总块数
+                "source_title": document['title'],      # 保留原文标题，便于追溯
+            }
+
+    b 整体不分割：
+        data = {
+                "chunk_id": document['doc_id'],      # 直接使用文献ID作为块ID
+               "text": full_text,
+                "doc_id": document['doc_id'],
+                "chunk_index": 0,
+               "total_chunks": 1,
+                "source_title": document['title'],
+                "token_count": self._count_tokens(full_text),
+            }
+
+
+3 分割文档，保存结果
+    保存处理配置和统计信息
+    stats = {
+            "processed_date": pd.Timestamp.now().isoformat(),
+            "data_split": data_split,
+            "original_documents": len(df_raw),
+            "total_chunks": len(chunks_df),
+            "chunks_per_doc": len(chunks_df) / len(df_raw) if len(df_raw) > 0 else 0,
+            "chunk_size": chunk_size,
+            "chunk_overlap": chunk_overlap,
+            "output_file": str(output_path),
+        }
+
+
+4 预览结果
+5 质量验证
+    对生成的文本块进行质量抽样检查
+        总块数，是否超过模型限制
+        文本质量
+        是否包含标题
+        文本是否被不完整截断
+    对多块分割文献重点进行检查
+        以上所有+检查重叠部分
+
+
+交付产物：
+
+    文本块数据集(Parquet/JSONL文件，本地存储无需上交)
+    处理日志和统计报告（文本块平均大小，分布）
+    质量验证结果

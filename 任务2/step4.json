@@ -1,0 +1,22 @@
+{
+  "section_distribution": {
+    "n_sections": 17350,
+    "median": 648,
+    "mean": 1092,
+    "p90": 2608,
+    "p95": 3730,
+    "max": 19580,
+    "pct_le_512": 45.6,
+    "pct_le_1024": 62.9,
+    "pct_over_512": 54.4
+  },
+  "strategy_sim": {
+    "config": "512/64",
+    "total_chunks": 51292,
+    "mean_chunks_per_doc": 16.9,
+    "sections_fit_whole_pct": 45.6,
+    "sections_needing_recursive": 9446
+  },
+  "naive_wholedoc_total_chunks": 43637,
+  "img": "E:\\rag\\report_data\\section_hist.png"
+}

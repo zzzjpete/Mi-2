@@ -1,0 +1,194 @@
+
+================================================================================================
+汇总
+================================================================================================
+时间：2026-08-03 20:03:21｜检索快照生成于 2026-07-31 18:38:27｜4 道题
+
+【一】批量处理：串行 vs 并行（两趟都是冷缓存，起跑线相同）
+  趟                                    并发      墙钟 s    成功     缓存命中
+  趟 1 · 串行（缓存已清空，冷启动）                   1    144.53   4/4         0
+  趟 2 · 并行 4 线程（缓存已清空，冷启动）              4    106.37   4/4         0
+  趟 3 · 并行（缓存已预热，走流水线级缓存）               4      0.00   4/4         4
+  并行相对串行：1.36×（144.5s → 106.4s）
+  ⚠ 本机是单卡 + 单个 Ollama 进程，多个请求争同一份权重与同一块 GPU；
+    这个倍数量的是**本机实际**能拿到多少并行收益，不是线程池的理论上限。
+
+【二】缓存：冷 vs 热（同一批查询、同一批证据）
+  冷（趟 2）墙钟 106.37s，缓存命中 0
+  热（趟 3）墙钟 0.00s，缓存命中 4/4
+  缓存替下来的模型时间：360.8s（四题合计，即冷跑时这些答案真花掉的时间）
+  热趟墙钟不到冷趟的 1/53,183（命中后只剩哈希与字典查找，不再调用模型）
+  命中返回的答案与首次逐字相同：4/4
+  阶段级缓存（只缓存温度 0 的 ①③）：{"hits": 0, "misses": 16, "skipped": 16, "seconds_saved": 0.0, "cache": {"entries": 8, "max_entries": 200, "bytes": 55600, "max_bytes": 67108864, "mb": 0.053, "ttl_seconds": 604800, "max_temperature": 0.0, "hit_rate": 0.0, "hits": 0, "misses": 16, "sets": 16, "skipped_temperature": 0, "evicted_lru": 0, "evicted_bytes": 0, "expired": 0, "seconds_saved": 0.0}}
+  流水线级缓存：{"entries": 4, "max_entries": 200, "bytes": 117765, "max_bytes": 67108864, "mb": 0.112, "ttl_seconds": 604800, "max_temperature": 0.3, "hit_rate": 1.0, "hits": 4, "misses": 0, "sets": 4, "skipped_temperature": 0, "evicted_lru": 0, "evicted_bytes": 0, "expired": 0, "seconds_saved": 360.797}
+
+【三】答案评估（4 份 RAG 答案，参照类型 = evidence）
+  用例          ROUGE-L f        关键信息召回      幻觉风险     可读性     均句长     中英混排
+  live-1         0.1242        0.3158    0.2331  0.7246    68.2     0.41
+  live-2         0.1468        0.1944    0.0000  0.6798    76.9     0.39
+  live-3         0.1577        0.2258    0.0000  0.7022    77.1     0.38
+  live-4         0.1526        0.2258    0.0000  0.6729    80.1     0.40
+  均值：{"cases": 4, "rouge_1_f": 0.1538, "rouge_2_f": 0.0492, "rouge_l_f": 0.1453, "key_info_recall": 0.2405, "key_info_recall_taskbook_6": 0.2446, "hallucination_risk": 0.0583, "hallucination_signals_unmitigated": 1, "hallucination_by_signal": {"vague_citation": 1}, "readability_score": 0.6949, "avg_sentence_length": 75.5825, "mixed_language_ratio": 0.3941, "reference_kinds": ["evidence"]}
+
+【四】同一把尺子量裸模型（复用阶段七已存的答案，未额外调模型）
+            ROUGE-L f        关键信息召回      幻觉风险      无出处信号     可读性
+  RAG          0.1453        0.2405    0.0583          1  0.6949
+  裸模型          0.1219        0.0846    0.0437          1  0.8096
+  ⚠ 这里的 ROUGE / 召回是对**同一批检索证据**算的：RAG 看得见这些证据、裸模型看不见，
+    所以 RAG 更高是意料之中——它量的是「有没有贴着证据写」，不是「谁答得更对」。
+    真正需要人工标注才能回答的是后者。
+
+================================================================================================
+  [PASS] 并行趟四道题全部成功（4/4）
+  [PASS] 批量输出顺序与输入一致（逐条核对 index）
+  [PASS] 热缓存趟全部命中（4/4）
+  [PASS] 缓存命中返回的答案与首次逐字相同
+  [PASS] 缓存命中后墙钟显著下降（106.4s → 0.00s）
+  [PASS] 阶段级缓存只收下了温度 0 的调用（写入 16，因高温跳过 16）
+  [PASS] 每份答案都拿到四个维度的分数（4 份）
+  [PASS] RAG 对证据的贴合度高于裸模型（ROUGE-L 0.1453 vs 0.1219）
+  [PASS] RAG 的关键信息召回高于裸模型（0.2405 vs 0.0846）
+
+  9/9 项通过
+
+  ⚠ 口径提醒：本轮没有人工标准答案，ROUGE 与关键信息召回的参照是**检索到的证据原文**，
+    量的是「答案有没有贴着证据写」；幻觉信号是**措辞层面**的启发式；
+    可读性分是约定的经验带。三者都不能单独当作「答得对不对」的判据。
+
+================================================================================================
+答案全文（趟 2 的结果）
+================================================================================================
+
+------------------------------------------------------------------------------------------------
+[live-1]
+------------------------------------------------------------------------------------------------
+## 回答
+Multiple studies have scrutinized the off-target effects of CRISPR/Cas9, indicating that unintended cleavage can occur [S1]. Off-target effects can occur at levels 10 to 100 times lower than the target site, according to S2. PAM distal mismatches in the RNA:DNA hybrid can interfere with the activation of the HNH domain, according to S5.
+
+## 证据要点
+- A review of multiple studies indicates that off-target effects of CRISPR/Cas9 have been extensively investigated, according to S1 (2021).  
+- Using GUIDE-seq, it was found that Cas12a causes off-target effects, although less frequently compared to Cas9 [S2] (2024).  
+- Molecular dynamics simulations revealed that mismatches at the distal end of the PAM sequence disrupt the activation of the HNH domain, according to S5 (2020).  
+
+## 证据强度与一致性
+证据主要来源于文献综述、实验研究和分子动力学模拟，涵盖不同年份（2020–2024），整体上对CRISPR/Cas9的脱靶效应存在一致的描述，但未提供具体数据或量化分析，因此证据强度以描述性研究为主，缺乏统一的实验标准或统计分析。
+
+## 局限与提示
+现有证据未明确说明脱靶事件的具体频率、数量或影响程度，也未提供高保真Cas9变体在减少脱靶效应方面的具体效果数据。此外，脱靶效应的机制和影响因素（如gRNA浓度、Cas9蛋白表达水平）虽被提及，但缺乏详细的实验参数或阈值信息。因此，对于临床应用中的具体风险评估和干预策略，仍需由临床医师结合患者个体情况判断。
+
+## 参考文献
+[S1] crisprSQL: a novel database platform for CRISPR/Cas off-target cleavage assays Nucleic Acids Research (2021). PMC7778913 / PMID 33084893  
+[S2] Engineering of Cas12a nuclease variants with enhanced genome-editing specificity PLOS Biology (2024). PMC10965058 / PMID 38483978  
+[S3] Progresses, Challenges, and Prospects of CRISPR/Cas9 Gene-Editing in Glioma Studies Cancers (2023). PMC9856991  
+[S4] HyCas9-12aGEP: an efficient genome editing platform for  Corynebacterium glutamicum Frontiers in Bioengineering and Biotechnology (2024). PMC10963414 / PMID 38532881  
+[S5] Spontaneous Embedding of DNA Mismatches Within the RNA:DNA Hybrid of CRISPR-Cas9 Frontiers in Molecular Biosciences (2020). PMC7093078 / PMID 32258048
+
+> ⚠ 本回答由检索到的公开文献自动生成，仅供专业文献检索参考，不构成临床诊疗建议；具体用药与处置须由临床医师结合患者情况判断。
+  ① 相似性  ROUGE-1 f=0.1272  ROUGE-2 f=0.0409  ROUGE-L f=0.1242   [rouge-lib，参照=evidence]
+  ② 关键信息召回 0.3158（6/19）  percentage=0/5  dosage=1/2  safety=1/3  recommendation=0/1  mechanism=4/8
+  ③ 幻觉风险 0.2331（中）  信号 1 个无出处 / 共 1 个  {'vague_citation': 1}
+  ④ 可读性 0.7246  平均句长 68.22 字（27 句，长句占比 0.44）  中英混排 0.41
+
+------------------------------------------------------------------------------------------------
+[live-2]
+------------------------------------------------------------------------------------------------
+## 回答
+Enzyme replacement therapy (ERT) with recombinant human α-galactosidase is used for Fabry disease [S4]. ERT and chaperone therapy (migalastat) are used for Fabry disease, with evidence supporting their effectiveness in clinical settings [S2]. ERT includes agalsidase-β, which is currently available for treatment, while agalsidase-α is also used in some contexts [S5]. Patients who do not produce AGAL require ERT, as it is a standard treatment for those with complete enzyme deficiency [S3].
+
+## 证据要点
+- ERT with recombinant human α-galactosidase has been available since 2001 in Europe and 2003 in the USA, and is used for Fabry disease [S4].  
+- ERT significantly decreases globotriaosylceramide levels and improves outcomes such as kidney function, cardiac structure, and quality of life [S4].  
+- ERT and chaperone therapy (migalastat) are used for Fabry disease, with evidence supporting their effectiveness in clinical settings [S2].  
+- ERT includes agalsidase-β, which is currently available for treatment, while agalsidase-α is also used in some contexts [S5].  
+- Patients who do not produce AGAL require ERT, as it is a standard treatment for those with complete enzyme deficiency [S3].
+
+## 证据强度与一致性
+证据主要来源于病例报告 [S4]、研究设计与协议 [S2] 以及综述性文章 [S5]，整体一致性较高，均支持 ERT 和 chaperone therapy (migalastat) 在 Fabry 疾病中的应用。然而，关于具体药物（如 agalsidase-α 和 agalsidase-β）的可用性及疗效，证据存在一定的模糊性，未明确区分其临床应用范围和时间跨度。
+
+## 局限与提示
+- 证据未明确说明 ERT 的具体剂量或给药频率，仅提及“1 mg/kg every other week” [S5]。  
+- 证据未提供关于 ERT 长期疗效或副作用的详细数据，仅提及改善效果 [S4]。  
+- 关于 migalastat 的使用条件和疗效，虽然有提及 [S2][S5]，但未详细说明哪些基因变异适合使用该药物。  
+- 证据中未提到 ERT 对不同年龄组或性别患者的疗效差异，也未涉及个体化治疗策略。  
+- 涉及具体用药、剂量及个体化处置时，需由临床医师结合患者情况判断。
+
+## 参考文献
+[S1] Endothelial Dysfunction in Fabry Disease Is Related to Glycocalyx Degradation Frontiers in Immunology (2021). PMC8670230 / PMID 34917096  
+[S2] Dapaglifozin on Albuminuria in Chronic Kidney Disease Patients with FabrY Disease: The DEFY Study Design and Protocol Journal of Clinical Medicine (2023). PMC10253838  
+[S3] Drug Repositioning for Fabry Disease: Acetylsalicylic Acid Potentiates the Stabilization of Lysosomal Alpha-Galactosidase by Pharmacological Chaperones International Journal of Molecular Sciences (2022). PMC9105905  
+[S4] Case Report: First Two Identified Cases of Fabry Disease in Central Asia Frontiers in Genetics (2021). PMC8110900 / PMID 33986771  
+[S5] Downregulation of Mannose-6-Phosphate Receptors in Fabry Disease Cardiomyopathy: A Potential Target for Enzyme Therapy Enhancement Journal of Clinical Medicine (2022). PMC9502235
+
+> ⚠ 本回答由检索到的公开文献自动生成，仅供专业文献检索参考，不构成临床诊疗建议；具体用药与处置须由临床医师结合患者情况判断。
+  ① 相似性  ROUGE-1 f=0.1530  ROUGE-2 f=0.0506  ROUGE-L f=0.1468   [rouge-lib，参照=evidence]
+  ② 关键信息召回 0.1944（7/36）  percentage=0/13  dosage=1/6  duration=0/4  safety=0/2  recommendation=2/4  mechanism=4/5  statistic=0/2
+  ③ 幻觉风险 0.0000（低）  信号 0 个无出处 / 共 0 个  
+  ④ 可读性 0.6798  平均句长 76.91 字（33 句，长句占比 0.45）  中英混排 0.39
+
+------------------------------------------------------------------------------------------------
+[live-3]
+------------------------------------------------------------------------------------------------
+## 回答
+Disease-modifying therapies (DMTs) for multiple sclerosis are classified based on their efficacy in reducing disease activity, with some categorized as moderately effective and others as highly effective [S2]. Examples of highly effective DMTs include ocrelizumab and cladribine [S2], while glatiramer acetate is used as a first-line treatment for relapsing-remitting MS [S4]. Natalizumab is a monoclonal antibody that targets VLA-4 to reduce central nervous system inflammation [S5].
+
+## 证据要点
+- DMTs are identified as moderately effective (e.g., interferon-β, dimethyl fumarate) or highly effective (e.g., ocrelizumab, cladribine) based on their efficacy in reducing disease activity [S2].  
+- Glatiramer acetate (GA) is described as a first-line DMT for relapsing-remitting MS [S4].  
+- Natalizumab is a monoclonal antibody that reduces central nervous system inflammation by blocking VLA-4 [S5].  
+- Over 15 DMTs have been licensed since 1993, but no detailed classification criteria are provided in the literature [S6].
+
+## 证据强度与一致性
+证据主要来源于综述和病例报告，其中 [S2] 和 [S5] 提供了药物分类和作用机制的信息，[S4] 和 [S6] 提供了药物使用情况和数量。这些证据在分类方式上基本一致，但缺乏统一的分类标准或详细定义，且部分信息基于个案或文献综述，证据强度存在差异。
+
+## 局限与提示
+现有证据未提供 DMTs 的完整分类体系，如基于作用机制（如干扰素、单克隆抗体、口服药物等）的分类 [S6]。此外，未明确高度有效与中等有效的具体定义或标准 [S2]。药物分类和疗效评估需结合临床实践，建议由临床医师根据患者具体情况判断。
+
+## 参考文献
+[S1] National plans and awareness campaigns as priorities for achieving global brain health The Lancet. Global Health (2024). PMC10951964  
+[S2] Cladribine and ocrelizumab induce differential miRNA profiles in peripheral blood mononucleated cells from relapsing–remitting multiple sclerosis patients Frontiers in Immunology (2023). PMC10751352 / PMID 38152407  
+[S3] Polypharmacy in patients with multiple sclerosis and the impact on levels of care and therapy units Frontiers in Neurology (2023). PMC10768059  
+[S4] Drug‐induced liver injury by glatiramer acetate leading to liver transplant: A case report JGH Open: An Open Access Journal of Gastroenterology and Hepatology (2023). PMC10463015 / PMID 37649866  
+[S5] Adverse Obstetric Outcomes in Pregnant Women Using Natalizumab for the Treatment of Multiple Sclerosis: A Systematic Review Cureus (2022). PMC9635932 / PMID 36381897  
+[S6] Immunotherapy for people with clinically isolated syndrome or relapsing-remitting multiple sclerosis: treatment response by demographic, clinical, and biomarker subgroups (PROMISE)—a systematic review protocol Systematic Reviews (2022). PMC9250266
+
+> ⚠ 本回答由检索到的公开文献自动生成，仅供专业文献检索参考，不构成临床诊疗建议；具体用药与处置须由临床医师结合患者情况判断。
+  ① 相似性  ROUGE-1 f=0.1720  ROUGE-2 f=0.0458  ROUGE-L f=0.1577   [rouge-lib，参照=evidence]
+  ② 关键信息召回 0.2258（7/31）  percentage=0/4  dosage=0/7  duration=0/4  safety=0/3  recommendation=4/6  mechanism=3/7
+  ③ 幻觉风险 0.0000（低）  信号 0 个无出处 / 共 0 个  
+  ④ 可读性 0.7022  平均句长 77.06 字（32 句，长句占比 0.41）  中英混排 0.38
+
+------------------------------------------------------------------------------------------------
+[live-4]
+------------------------------------------------------------------------------------------------
+## 回答
+Lecanemab, an anti-amyloid monoclonal antibody, was approved by the FDA for early Alzheimer’s disease based on results from both phase 2 and phase 3 trials [S5]. Key trials, including the phase 3 CLARITY-AD trial, were reported in 2022, with the FDA expected to review the data in mid-2023 [S5]. Aducanumab, another anti-amyloid monoclonal antibody, was approved via an accelerated pathway, with mixed clinical benefit evidence observed in phase 3 trials [S5].
+
+## 证据要点
+- Lecanemab was approved by the FDA on January 6, 2023, based on phase 2 and phase 3 trial results, including a phase 3 trial that showed significant slowing of cognitive decline in early Alzheimer’s disease patients [S5].  
+- The phase 3 trial included 1795 patients with early Alzheimer’s disease and reported a mean change from baseline of −0.45 (p < 0.001) in the lecanemab group compared to placebo [S5].  
+- Lecanemab was observed to reduce amyloid burden in a sub-cohort of 698 patients, as measured by PET, while placebo did not show such reduction [S5].  
+- The phase 2 trial of lecanemab showed marked lowering of amyloid plaques based on amyloid PET [S1].  
+- Aducanumab was approved by the FDA in 2021 via an accelerated pathway, with significant slowing of cognitive decline observed in one of two phase 3 trials [S5].  
+
+## 证据强度与一致性
+证据主要来源于临床试验（phase 2 和 phase 3），且在多个来源中一致表明 lecanemab 在减少脑内淀粉样蛋白负荷和延缓认知衰退方面显示出积极效果 [S1][S5]。Aducanumab 的临床益处证据较为混杂，仅在一项 phase 3 试验中显示出显著的延缓认知衰退效果 [S5]。证据的时间跨度为 2019 至 2023 年，但部分关键数据（如具体试验终点或统计显著性）未在摘要中详细说明 [S5]。
+
+## 局限与提示
+- 现有证据未提供 lecanemab 长期安全性和疗效的详细信息，仅提及正在进行的扩展研究 [S5]。  
+- Aducanumab 的临床益处仍存在不确定性，需进一步验证 [S5]。  
+- 临床应用中需结合患者个体情况，由临床医师判断是否适合使用这些抗淀粉样蛋白单克隆抗体 [S1][S5]。  
+- 证据未明确说明 FDA 最终决定的详细时间表，仅提及 2023 年中预期审查 [S1]。  
+
+## 参考文献
+[S1] Lecanemab: Appropriate Use Recommendations The journal of prevention of Alzheimer's disease (2023). PMC10313141 / PMID 37357276  
+[S2] Aducanumab—Hope or Disappointment for Alzheimer’s Disease International Journal of Molecular Sciences (2023). PMC10002282  
+[S3] Critical Appraisal of Amyloid Lowering Agents in AD Current Neurology and Neuroscience Reports (2021). PMC8192384 / PMID 34110536  
+[S4] Performance of Fully Automated Plasma Assays as Screening Tests for Alzheimer Disease–Related β-Amyloid Status JAMA Neurology (2019). PMC6593637 / PMID 31233127  
+[S5] FDA approval of lecanemab: the real start of widespread amyloid PET use? — the EANM Neuroimaging Committee perspective European Journal of Nuclear Medicine and Molecular Imaging (2023). PMC10119064 / PMID 36869178  
+[S6] Neuroprotective and Disease-Modifying Effects of the Triazinetrione ACD856, a Positive Allosteric Modulator of Trk-Receptors for the Treatment of Cognitive Dysfunction in Alzheimer’s Disease International Journal of Molecular Sciences (2023). PMC10342804
+
+> ⚠ 本回答由检索到的公开文献自动生成，仅供专业文献检索参考，不构成临床诊疗建议；具体用药与处置须由临床医师结合患者情况判断。
+  ① 相似性  ROUGE-1 f=0.1631  ROUGE-2 f=0.0594  ROUGE-L f=0.1526   [rouge-lib，参照=evidence]
+  ② 关键信息召回 0.2258（7/31）  percentage=0/4  dosage=0/1  duration=0/2  safety=1/6  recommendation=3/6  mechanism=2/7  statistic=1/5
+  ③ 幻觉风险 0.0000（低）  信号 0 个无出处 / 共 0 个  
+  ④ 可读性 0.6729  平均句长 80.14 字（35 句，长句占比 0.43）  中英混排 0.40

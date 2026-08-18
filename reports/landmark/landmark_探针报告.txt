@@ -1,0 +1,57 @@
+====================================================================================================
+P0 验收探针：landmark 在自己的题面上进没进上下文 + 进的那一块里有没有那个数
+====================================================================================================
+时间：2026-08-15 20:36:21　题目 8 条（英文，绕开中译英那一层）
+landmark 集合：medrag_landmark @ E:\rag\data\chroma_landmark（10 条，保底 2）
+
+⚠ 这把尺子只量 P0 的**收益**。P0 的**代价**（挤掉主库候选）在 golden 上量，
+  两把尺子各测一半，缺一边就会得出片面结论。
+
+① 召回层：landmark 有没有进上下文
+----------------------------------------------------------------------------------------------------
+题面                                                  期望                          开     关     命中
+What is the evidence for SGLT2 inhibitors in heart  EMPEROR-Pres/DELIVER        2     0     ✓ DELIVER
+Dapagliflozin in heart failure with mildly reduced  DELIVER                     3     0     ✓ DELIVER
+Does sacubitril/valsartan reduce hospitalization i  PARAGON-HF                  1     0     ✓ PARAGON-HF
+Spironolactone in heart failure with preserved eje  TOPCAT 主结果/TOPCAT 区域差异      2     0     ✓ TOPCAT 主结果/TOPCAT 区域差异
+SGLT2 inhibitor outcomes in heart failure with red  DAPA-HF/EMPEROR-Redu        2     0     ✓ DAPA-HF/EMPEROR-Reduce
+Should healthy older adults take aspirin for prima  ASPREE/USPSTF 2022          2     0     ✓ ASPREE/USPSTF 2022 阿司
+Aspirin for primary prevention in patients with di  ASCEND                      1     0     ✓ ASCEND
+USPSTF recommendation on aspirin use to prevent ca  USPSTF 2022                 1     0     ✓ USPSTF 2022 阿司
+----------------------------------------------------------------------------------------------------
+**8/8 条题面上，期望的 landmark 进了上下文**
+对照：关掉 landmark 路时进上下文的 landmark 条目 0 条（应当恒为 0，否则说明开关没生效）
+
+② 数字层：进上下文的那一块里，要害数字在不在
+----------------------------------------------------------------------------------------------------
+  DELIVER                       ✓  效应量 ✓　95%CI ✓　入组人数 ✓
+  DAPA-HF                       ✓  效应量 ✓　95%CI ✓　入组人数 ✓
+  DELIVER                       ✓  效应量 ✓　95%CI ✓　入组人数 ✓
+  EMPEROR-Preserved             ✓  效应量 ✓　95%CI ✓　入组人数 ✓
+  DAPA-HF                       ✓  效应量 ✓　95%CI ✓　入组人数 ✓
+  PARAGON-HF                    ✓  效应量 ✓　95%CI ✓　入组人数 ✓
+  TOPCAT 区域差异                   ✗  效应量 ✓　95%CI ✗　入组人数 ✓
+  TOPCAT 主结果                    ✓  效应量 ✓　95%CI ✓　入组人数 ✓
+  EMPEROR-Reduced               ✓  效应量 ✓　95%CI ✓　入组人数 ✓
+  DAPA-HF                       ✓  效应量 ✓　95%CI ✓　入组人数 ✓
+  USPSTF 2022 阿司匹林一级预防          ✓  推荐等级 ✓　年龄分层 ✓
+  ASPREE                        ✓  效应量 ✓　95%CI ✓　入组人数 ✓
+  ASCEND                        ✓  效应量 ✓　95%CI ✓　入组人数 ✓
+  USPSTF 2022 阿司匹林一级预防          ✓  推荐等级 ✓　年龄分层 ✓
+----------------------------------------------------------------------------------------------------
+**13/14 次进上下文的 landmark，原文里带着该类型的要害信息**
+
+③ 保底机制的动作（每题）
+----------------------------------------------------------------------------------------------------
+题面                                                  池内      进上下文      保底补入      因不够相关被拒
+What is the evidence for SGLT2 inhibitors in heart  4       2         1         0
+Dapagliflozin in heart failure with mildly reduced  4       3         0         0
+Does sacubitril/valsartan reduce hospitalization i  4       1         0         3
+Spironolactone in heart failure with preserved eje  4       2         0         0
+SGLT2 inhibitor outcomes in heart failure with red  4       2         2         0
+Should healthy older adults take aspirin for prima  4       2         0         0
+Aspirin for primary prevention in patients with di  4       1         0         3
+USPSTF recommendation on aspirin use to prevent ca  4       1         0         3
+
+⚠ 「因不够相关被拒」恒为 0 说明保底又变回了无条件——那会往每个上下文里塞无关文献。
+  实测无关 query 上 landmark 的 rel 只有 0.000~0.08，而被它挤掉的主库候选是 0.72~0.97。

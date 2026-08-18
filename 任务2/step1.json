@@ -1,0 +1,88 @@
+{
+  "n_docs": 3028,
+  "n_parse_fail": 0,
+  "completeness": {
+    "pmcid": {
+      "missing": 0,
+      "missing_rate_pct": 0.0,
+      "present": 3028
+    },
+    "pmid": {
+      "missing": 275,
+      "missing_rate_pct": 9.08,
+      "present": 2753
+    },
+    "doi": {
+      "missing": 0,
+      "missing_rate_pct": 0.0,
+      "present": 3028
+    },
+    "journal": {
+      "missing": 0,
+      "missing_rate_pct": 0.0,
+      "present": 3028
+    },
+    "pub_year": {
+      "missing": 0,
+      "missing_rate_pct": 0.0,
+      "present": 3028
+    },
+    "title": {
+      "missing": 0,
+      "missing_rate_pct": 0.0,
+      "present": 3028
+    },
+    "abstract": {
+      "missing": 253,
+      "missing_rate_pct": 8.36,
+      "present": 2775
+    },
+    "body_text": {
+      "missing": 0,
+      "missing_rate_pct": 0.0,
+      "present": 3028
+    }
+  },
+  "quality": {
+    "short_abstract_1_100": 34,
+    "empty_body": 0,
+    "short_body_1_500": 5,
+    "encoding_error_docs": 0
+  },
+  "metadata": {
+    "journal_distinct": 140,
+    "journal_top10": {
+      "PLoS Biology": 549,
+      "BMC Bioinformatics": 162,
+      "PLoS Medicine": 124,
+      "BMC Cancer": 88,
+      "BMC Genomics": 86,
+      "BMC Public Health": 66,
+      "Genome Biology": 63,
+      "BMC Infectious Diseases": 52,
+      "BMC Neuroscience": 52,
+      "BMC Evolutionary Biology": 52
+    },
+    "year_min": 2003,
+    "year_max": 2024,
+    "year_last5_count": 39,
+    "year_hist": {
+      "2003": 32,
+      "2004": 2030,
+      "2005": 927,
+      "2024": 39
+    },
+    "pmid_coverage_pct": 90.92
+  },
+  "structure_preview": {
+    "docs_with_sections": 2695,
+    "docs_with_imrad_titles": 2538,
+    "median_sections": 13
+  },
+  "length_glance_chars": {
+    "abstract_median": 1526,
+    "body_median": 22430,
+    "body_p95": 53766,
+    "body_max": 122926
+  }
+}

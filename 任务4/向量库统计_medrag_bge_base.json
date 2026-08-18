@@ -1,0 +1,28 @@
+{
+  "collection_name": "medrag_bge_base",
+  "total_chunks": 3998000,
+  "embedding_model": "BAAI/bge-base-en-v1.5",
+  "embedding_dimension": 768,
+  "index_built_at": "2026-07-16T17:02:42",
+  "chunk_size_stats": {
+    "mean": 420.83,
+    "max": 520,
+    "min": 1
+  },
+  "metadata_fields": [
+    "doc_id",
+    "chunk_index",
+    "total_chunks",
+    "source_title",
+    "token_count",
+    "section",
+    "pmcid",
+    "pmid",
+    "journal",
+    "pub_year"
+  ],
+  "distance_metric": "cosine",
+  "note": "从损坏 Chroma 段恢复的预计算向量重建（未重嵌入）",
+  "chroma_path": "E:\\rag\\data\\chroma_db_4m",
+  "build_seconds": 16221.9
+}

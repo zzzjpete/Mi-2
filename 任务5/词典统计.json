@@ -1,0 +1,92 @@
+{
+  "generated_at": "2026-07-20T00:52:18",
+  "static_dict": {
+    "abbreviations": 117,
+    "ambiguous_abbreviations": [
+      "crc",
+      "ct",
+      "cva",
+      "hba1c",
+      "mi",
+      "ngs",
+      "rr"
+    ],
+    "lay_terms": 30,
+    "drug_brands": 32,
+    "spelling_variants": 24,
+    "cn_en_terms": 95,
+    "total_entries": 298,
+    "MEDICAL_SYNONYMS_merged": 203
+  },
+  "entity_patterns": {
+    "categories": [
+      "drug",
+      "disease",
+      "gene_protein",
+      "procedure",
+      "study_design",
+      "measurement"
+    ],
+    "count": 6
+  },
+  "generic_noise_blocklist": 83,
+  "mesh_dict": {
+    "source": "desc2026.xml",
+    "built_at": "2026-07-20T00:19:19",
+    "descriptor_records_scanned": 31110,
+    "descriptors_kept": 26694,
+    "surface_forms_indexed": 107944,
+    "by_type": {
+      "disease": 5193,
+      "drug": 10649,
+      "procedure": 3090,
+      "process": 2050,
+      "anatomy": 1774,
+      "organism": 3938
+    },
+    "ambiguous_surface_forms": 0,
+    "filters": {
+      "kept_tree_branches": {
+        "C": "disease",
+        "D": "drug",
+        "E": "procedure",
+        "A": "anatomy",
+        "B": "organism",
+        "G": "process"
+      },
+      "dropped_permuted_terms": 116350,
+      "dropped_out_of_branch": 4361,
+      "dropped_bad_surface": 4091
+    },
+    "build_seconds": 5.5
+  },
+  "corpus_meta": {
+    "rows": 4002283,
+    "pub_year": {
+      "min": 1781,
+      "max": 2026,
+      "p05": 2012
+    },
+    "section_distinct_raw_values": 391164,
+    "section_canonical_counts": {
+      "results": 1125355,
+      "methods": 790739,
+      "introduction": 442983,
+      "discussion": 541480,
+      "abstract": 178221,
+      "_nonbody": 124649,
+      "conclusion": 102135
+    },
+    "section_raw_variants_needed_for_99pct": {
+      "results": 24,
+      "methods": 7726,
+      "introduction": 5,
+      "discussion": 7,
+      "abstract": 1,
+      "_nonbody": 107,
+      "conclusion": 47
+    },
+    "section_unmapped_pct": 17.4,
+    "journal_distinct": 12185
+  }
+}

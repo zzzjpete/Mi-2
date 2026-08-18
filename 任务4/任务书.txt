@@ -1,0 +1,86 @@
+========================================================
+ 阶段四 · 向量化与索引构建
+========================================================
+任务下达：2026-07-16 ｜ 原文补录：2026-07-31
+实现与逐条对照见 任务4/README.md「对照任务书」。
+
+--------------------------------------------------------
+
+向量化与索引构建
+
+文本块数据集（Parquet/JSONL文件）
+
+1嵌入模型选择与加载
+
+BGE：
+BAAI/bge-small-en-v1.5
+BAAI/bge-base-en-v1.5（8GB）
+BAAI/bge-large-en-v1.5（16GB）
+
+OpenAI（付费）：
+text-embedding-3-small
+text-embedding-3-large
+
+其他：
+clinicalBERT（需自行微调）
+
+流程：
+
+#初始化模型
+#批量生成文档向量
+#生成查询向量
+
+#BGE查询添加指令获得更好的检索效果
+#OpenAI需做批量处理
+
+2 向量数据库配置与索引构建
+
+使用ChromaDB构建持久化向量索引
+
+#创建合集（使用余弦相似度）
+#构建元数据，添加元数据，生成唯一id（doc_id + chunk_index）
+#验证索引大小
+#保存统计信息
+stats = {
+            "collection_name":
+            "total_chunks":
+            "embedding_model":
+            "embedding_dimension":
+            "index_built_at":
+            "chunk_size_stats": {
+                "mean":
+                "max":
+                "min":
+            } if 'token_count' in chunks_df.columns else {},
+            "metadata_fields":
+        }
+#query查询
+        Args:
+            query_text: 查询文本
+            embedding_model: 嵌入模型
+            n_results: 返回结果数量
+            where_filter: 元数据过滤条件
+
+        Returns:
+            查询结果
+
+
+3 质量验证工作：
+#基础统计验证（向量数量，样本元数据）
+#相似性检索验证（从索引中摘取文本作为查询，测试自相似性）
+#边界情况验证（空查询，超长查询）
+
+本周产出：
+
+向量数据库文件
+正确向量数量的索引统计
+测试查询返回相关医学文献片段
+*元数据过滤功能正常工作
+
+一些可能的相关问题：
+
+内存不足：减小batch_size，使用model_type="bge-small"，或分批次处理
+
+查询速度慢：确保使用GPU（如可用），或考虑量化嵌入模型
+
+检索结果不相关：检查文本块质量，调整chunk_size或尝试不同的嵌入模型

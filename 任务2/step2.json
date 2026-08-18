@@ -1,0 +1,559 @@
+{
+  "token_bands": {
+    "q33": 4182,
+    "q66": 7400,
+    "short_max": 4182,
+    "long_min": 7401,
+    "counts": {
+      "short": 1010,
+      "medium": 1009,
+      "long": 1009
+    }
+  },
+  "samples": {
+    "short": [
+      {
+        "pmcid": "PMC522807",
+        "journal": "BMC Bioinformatics",
+        "year": 2004,
+        "tokens": 3718,
+        "n_sections": 13,
+        "sec_titles": [
+          "Background",
+          "Construction and content",
+          "Data collection",
+          "Implementation",
+          "Data retrieval",
+          "Description of an entry",
+          "Taxonomic distribution of the entries",
+          "Motif distribution"
+        ],
+        "uniq_acronyms": 16
+      },
+      {
+        "pmcid": "PMC506778",
+        "journal": "BMC Genetics",
+        "year": 2004,
+        "tokens": 3723,
+        "n_sections": 11,
+        "sec_titles": [
+          "Background",
+          "Results",
+          "Effect of  cftr  gene dosage on pressure-volume (PV) curves",
+          "Airway mechanics of  cftr  deficient lungs",
+          "Discussion",
+          "Conclusions",
+          "Methods",
+          "Mouse strain"
+        ],
+        "uniq_acronyms": 9
+      },
+      {
+        "pmcid": "PMC521734",
+        "journal": "PLoS Biology",
+        "year": 2004,
+        "tokens": 132,
+        "n_sections": 0,
+        "sec_titles": [],
+        "uniq_acronyms": 1
+      },
+      {
+        "pmcid": "PMC551614",
+        "journal": "BMC Blood Disorders",
+        "year": 2005,
+        "tokens": 4138,
+        "n_sections": 8,
+        "sec_titles": [
+          "Background",
+          "Methods",
+          "Results",
+          "Discussion",
+          "Conclusion",
+          "Competing interests",
+          "Authors contributions",
+          "Pre-publication history"
+        ],
+        "uniq_acronyms": 22
+      },
+      {
+        "pmcid": "PMC549582",
+        "journal": "PLoS Medicine",
+        "year": 2005,
+        "tokens": 2319,
+        "n_sections": 6,
+        "sec_titles": [
+          "The Burden of Disease",
+          "The Importance of Correct Diagnosis",
+          "Microscopy as the Gold Standard for Diagnosis",
+          "Teaching Microscopy Online",
+          "Feedback from Users",
+          "Conclusion"
+        ],
+        "uniq_acronyms": 7
+      },
+      {
+        "pmcid": "PMC543465",
+        "journal": "PLoS Medicine",
+        "year": 2005,
+        "tokens": 727,
+        "n_sections": 0,
+        "sec_titles": [],
+        "uniq_acronyms": 4
+      }
+    ],
+    "medium": [
+      {
+        "pmcid": "PMC529253",
+        "journal": "BMC Neuroscience",
+        "year": 2004,
+        "tokens": 5521,
+        "n_sections": 15,
+        "sec_titles": [
+          "Background",
+          "Results",
+          "Effects of culture conditions on neurotrophic factor and cell-specific marker mRNA expression in C17.2 NSCs",
+          "Detection of MT 1  receptor mRNA and protein in C17.2 NSCs",
+          "Immunocytochemical detection of the MT 1  receptor and cell-specific markers in C17.2 NSCs",
+          "Induction of GDNF mRNA expression by melatonin in C17.2 NSCs",
+          "Discussion",
+          "Conclusions"
+        ],
+        "uniq_acronyms": 44
+      },
+      {
+        "pmcid": "PMC517722",
+        "journal": "BMC Dermatology",
+        "year": 2004,
+        "tokens": 4815,
+        "n_sections": 15,
+        "sec_titles": [
+          "Background",
+          "Methods",
+          "Patients",
+          "Skin biopsies and processing",
+          "Freezing",
+          "Fixative",
+          "Saline",
+          "Direct immunofluorescence microscopy"
+        ],
+        "uniq_acronyms": 34
+      },
+      {
+        "pmcid": "PMC546213",
+        "journal": "BMC Medical Genetics",
+        "year": 2005,
+        "tokens": 6495,
+        "n_sections": 10,
+        "sec_titles": [
+          "Background",
+          "Methods",
+          "Sample and Demographics",
+          "Genotype data and statistical analysis",
+          "Results",
+          "Discussion",
+          "Conclusions",
+          "Competing interests"
+        ],
+        "uniq_acronyms": 31
+      },
+      {
+        "pmcid": "PMC523849",
+        "journal": "BMC Bioinformatics",
+        "year": 2004,
+        "tokens": 5321,
+        "n_sections": 17,
+        "sec_titles": [
+          "Background",
+          "Results",
+          "1. Human microRNAs tend to have longer exact hits upon mRNAs than do their scrambled counterparts",
+          "2. Constructing an outlier set of microRNAs based on cut-offs of exact hit length, gapped BLAST score and presence of multiple hits",
+          "a) Exact hit length",
+          "b) Gapped-BLAST score",
+          "c) Multiple hits",
+          "d) Combining parameters"
+        ],
+        "uniq_acronyms": 14
+      },
+      {
+        "pmcid": "PMC553965",
+        "journal": "BMC Genomics",
+        "year": 2005,
+        "tokens": 7296,
+        "n_sections": 11,
+        "sec_titles": [
+          "Background",
+          "Results and discussion",
+          "A conserved domain architecture in BIG and GBF subfamilies",
+          "Evolution of BIGs and GFBs from a common ancestor",
+          "GBGs in plants: refining the functional evolution of BIGs and GBFs",
+          "A novel ArfGEF subfamily in alveolates",
+          "Conclusion",
+          "A conserved scenario for the activation of Arf proteins by their GEFs?"
+        ],
+        "uniq_acronyms": 83
+      },
+      {
+        "pmcid": "PMC555959",
+        "journal": "Reproductive biology and endocrinology : RB&E",
+        "year": 2005,
+        "tokens": 6575,
+        "n_sections": 11,
+        "sec_titles": [
+          "Introduction",
+          "Materials and methods",
+          "Results",
+          "Histology",
+          "Placental surface",
+          "Subplacenta, junctional zone and pedicle",
+          "Yolk Sac Placenta",
+          "Ultrastructure"
+        ],
+        "uniq_acronyms": 8
+      }
+    ],
+    "long": [
+      {
+        "pmcid": "PMC524252",
+        "journal": "PLoS Biology",
+        "year": 2004,
+        "tokens": 8648,
+        "n_sections": 14,
+        "sec_titles": [
+          "Introduction",
+          "Results",
+          "Temporal Heterogeneity",
+          "Spatial Heterogeneity",
+          "Gradients in EIR Away from Larval Habitat",
+          "Heterogeneous Distributions of Humans",
+          "Heterogeneous Larval Habitat and Human Population",
+          "Measuring EIR in Heterogeneous Environments"
+        ],
+        "uniq_acronyms": 7
+      },
+      {
+        "pmcid": "PMC514567",
+        "journal": "BioMedical Engineering OnLine",
+        "year": 2004,
+        "tokens": 11059,
+        "n_sections": 6,
+        "sec_titles": [
+          "Introduction",
+          "Methods",
+          "Experimental Validation",
+          "Results",
+          "Discussion",
+          "Disclaimer"
+        ],
+        "uniq_acronyms": 5
+      },
+      {
+        "pmcid": "PMC545779",
+        "journal": "Genome Biology",
+        "year": 2004,
+        "tokens": 11282,
+        "n_sections": 21,
+        "sec_titles": [
+          "Background",
+          "Results",
+          "BLAST analyses",
+          "Phylogenomic analyses",
+          "Genes of cyanobacterial/algal origin",
+          "Genes of eubacterial (non-cyanobacterial) origin",
+          "Mode of acquisition",
+          "Expression of transferred genes"
+        ],
+        "uniq_acronyms": 34
+      },
+      {
+        "pmcid": "PMC517950",
+        "journal": "Journal of Translational Medicine",
+        "year": 2004,
+        "tokens": 8639,
+        "n_sections": 24,
+        "sec_titles": [
+          "Background",
+          "Methods",
+          "Mice and Cell lines",
+          "Antibodies and reagents",
+          "Transient transfection of COS7 cells",
+          "Stable transfection of B16 melanoma cells with  PSMA  plasmid",
+          "Detection of  PSMA  mRNA by Reverse Transcriptase-PCR",
+          "Detection of PSMA protein by Western Blot"
+        ],
+        "uniq_acronyms": 50
+      },
+      {
+        "pmcid": "PMC551537",
+        "journal": "Genome Biology",
+        "year": 2005,
+        "tokens": 10050,
+        "n_sections": 22,
+        "sec_titles": [
+          "Background",
+          "Results",
+          "Preparation of mRNA from particular types of neurons using mRNA tagging",
+          "cDNA microarray experiments",
+          "Expression analysis of candidate sensory neuron-expressed genes by reporter fusions",
+          "Categorization of  che-2 ::PABP-enriched genes reveals specific features",
+          "Discussion",
+          "Preparation of mRNA from a subset of neurons in  C. elegans"
+        ],
+        "uniq_acronyms": 62
+      },
+      {
+        "pmcid": "PMC555958",
+        "journal": "BMC Pregnancy and Childbirth",
+        "year": 2005,
+        "tokens": 8700,
+        "n_sections": 48,
+        "sec_titles": [
+          "Background",
+          "Clinical significance of pre-eclampsia",
+          "Randomised trials of antiplatelet agents",
+          "Summary of systematic review of aggregate data in 2004",
+          "Limitations of the review using published, aggregate data",
+          "Ways of overcoming these limitations by using individual patient data",
+          "Methods/design",
+          "Objectives"
+        ],
+        "uniq_acronyms": 17
+      }
+    ]
+  },
+  "imrad_coverage_pct": {
+    "introduction": 16.6,
+    "background": 65.9,
+    "methods": 72.1,
+    "results": 71.4,
+    "discussion": 74.7,
+    "conclusions": 63.1
+  },
+  "full_imrad_pct": 69.2,
+  "acronyms": {
+    "median_unique_per_doc": 19,
+    "mean_acronyms_per_1k_tokens": 17.0,
+    "top20": [
+      [
+        "PCR",
+        5974
+      ],
+      [
+        "HIV",
+        4511
+      ],
+      [
+        "IL",
+        3128
+      ],
+      [
+        "GFP",
+        2080
+      ],
+      [
+        "RT",
+        1916
+      ],
+      [
+        "SD",
+        1791
+      ],
+      [
+        "CI",
+        1754
+      ],
+      [
+        "PBS",
+        1618
+      ],
+      [
+        "CA",
+        1596
+      ],
+      [
+        "GO",
+        1354
+      ],
+      [
+        "CD4",
+        1342
+      ],
+      [
+        "IFN",
+        1278
+      ],
+      [
+        "OR",
+        1195
+      ],
+      [
+        "ATP",
+        1146
+      ],
+      [
+        "CSF",
+        1042
+      ],
+      [
+        "WT",
+        1014
+      ],
+      [
+        "S1",
+        991
+      ],
+      [
+        "UK",
+        977
+      ],
+      [
+        "SDS",
+        975
+      ],
+      [
+        "BLAST",
+        971
+      ]
+    ]
+  },
+  "variant_pairs": [
+    {
+      "a": "myocardial infarction",
+      "docs_a": 94,
+      "b": "heart attack",
+      "docs_b": 15
+    },
+    {
+      "a": "neoplasm",
+      "docs_a": 74,
+      "b": "tumor",
+      "docs_b": 526
+    },
+    {
+      "a": "hypertension",
+      "docs_a": 189,
+      "b": "high blood pressure",
+      "docs_b": 25
+    },
+    {
+      "a": "tumor",
+      "docs_a": 526,
+      "b": "tumour",
+      "docs_b": 120
+    },
+    {
+      "a": "randomized",
+      "docs_a": 247,
+      "b": "randomised",
+      "docs_b": 105
+    }
+  ],
+  "top_content_terms_sample400": [
+    [
+      "cells",
+      4306
+    ],
+    [
+      "genes",
+      3225
+    ],
+    [
+      "expression",
+      2698
+    ],
+    [
+      "gene",
+      2570
+    ],
+    [
+      "protein",
+      2446
+    ],
+    [
+      "cell",
+      2377
+    ],
+    [
+      "patients",
+      2257
+    ],
+    [
+      "health",
+      2104
+    ],
+    [
+      "only",
+      2022
+    ],
+    [
+      "after",
+      1950
+    ],
+    [
+      "however",
+      1714
+    ],
+    [
+      "studies",
+      1638
+    ],
+    [
+      "research",
+      1634
+    ],
+    [
+      "proteins",
+      1483
+    ],
+    [
+      "during",
+      1467
+    ],
+    [
+      "model",
+      1404
+    ],
+    [
+      "sequence",
+      1395
+    ],
+    [
+      "first",
+      1385
+    ],
+    [
+      "some",
+      1372
+    ],
+    [
+      "could",
+      1236
+    ],
+    [
+      "levels",
+      1220
+    ],
+    [
+      "sequences",
+      1191
+    ],
+    [
+      "activity",
+      1185
+    ],
+    [
+      "same",
+      1166
+    ],
+    [
+      "significant",
+      1166
+    ]
+  ],
+  "token_len_glance": {
+    "median": 5631,
+    "p90": 11498,
+    "p95": 14079,
+    "p99": 19482,
+    "max": 27704
+  }
+}

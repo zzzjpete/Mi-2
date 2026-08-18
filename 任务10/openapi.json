@@ -1,0 +1,2990 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "医学知识 RAG 问答服务",
+    "description": "本地医学知识 RAG 问答服务。\n\n先从 PubMed oa_comm 语料检索证据，再由本地 `qwen3:8b` 依据证据作答，\n每个事实句都带 `[S#]` 出处，并在生成后逐条校验（阶段九强约束层）。\n\n* **统一响应体**：`{code, message, data, detail, request_id, timestamp, elapsed_ms}`，\n  成功与失败同一个形状；`code == 0` 为成功，码表见 `GET /api/v1/errors`。\n* **两种响应模式**：`POST /api/v1/qa/ask` 同步；`POST /api/v1/qa/stream` 走 SSE。\n* **一次问答 100 秒以上是常态**（四段链 + 层 D 校验），客户端超时请设足。\n",
+    "version": "0.10.2"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "元信息"
+        ],
+        "summary": "服务概览",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Root  Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "健康"
+        ],
+        "summary": "存活探针（永远不碰下游）",
+        "description": "只回答\"进程还在不在\"。**不探 Ollama、不碰磁盘**——存活探针一旦依赖下游，\n下游抖动就会把好好的进程重启掉。",
+        "operationId": "health_live_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Health Live Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "tags": [
+          "健康"
+        ],
+        "summary": "就绪探针（含下游依赖）",
+        "operationId": "health_ready_health_ready_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseModel_HealthData_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/errors": {
+      "get": {
+        "tags": [
+          "元信息"
+        ],
+        "summary": "错误码表",
+        "operationId": "error_table_api_v1_errors_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Error Table Api V1 Errors Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/config": {
+      "get": {
+        "tags": [
+          "元信息"
+        ],
+        "summary": "生效中的配置（已脱敏）",
+        "operationId": "config_api_v1_config_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Config Api V1 Config Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/qa/ask": {
+      "post": {
+        "tags": [
+          "问答"
+        ],
+        "summary": "同步问答",
+        "description": "等整条链跑完再一次性返回。本机四段链 + 层 D 校验，**单次 100 秒以上是常态**，客户端超时请设到 300 秒以上。",
+        "operationId": "ask_api_v1_qa_ask_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AskRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseModel_AskData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/qa/stream": {
+      "post": {
+        "tags": [
+          "问答"
+        ],
+        "summary": "流式问答（SSE）",
+        "description": "事件：`meta` 请求受理：request_id / session_id / 原始与改写后的问题 / 检索模式 / 链路开关；`stage` 某一段开始或结束：stage / status(start|end) / elapsed / token 数 / 是否成功；`sources` 出处清单，上下文组装完成即发出（早于模型的第一个字）；`delta` 文本增量：stage + text。**过程量**，最终答案以 done 为准；`check` 阶段九层 D 的校验与修正结果；`done` 最终结果，载荷与同步接口的 data 字段结构一致；`error` 失败：code / message / detail，之后流即结束",
+        "operationId": "ask_stream_api_v1_qa_stream_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AskRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Ask Stream Api V1 Qa Stream Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "问答"
+        ],
+        "summary": "流式问答（SSE，GET 版）",
+        "description": "给浏览器 `EventSource` 用——它只会发 GET，不能带请求体。参数语义与 POST 版完全一致。",
+        "operationId": "ask_stream_get_api_v1_qa_stream_get",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "用户问题",
+              "title": "Query"
+            },
+            "description": "用户问题"
+          },
+          {
+            "name": "top_k",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "default": 10,
+              "title": "Top K"
+            }
+          },
+          {
+            "name": "session_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "evaluate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Evaluate"
+            }
+          },
+          {
+            "name": "review",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Review"
+            }
+          },
+          {
+            "name": "evidence_pool",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Evidence Pool"
+            }
+          },
+          {
+            "name": "history_turns",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 20,
+              "minimum": 0,
+              "default": 4,
+              "title": "History Turns"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Ask Stream Get Api V1 Qa Stream Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/qa/topics": {
+      "get": {
+        "tags": [
+          "问答"
+        ],
+        "summary": "有真实证据的主题（快照模式）",
+        "description": "快照模式下只有固定几组真实检索结果。把清单公布出去，客户端可以在**发请求之前**判断这个问题问不问得出东西——否则要等二十几秒才知道答不了，而服务端第 0 秒就知道了。live 模式下返回空列表（任何问题都会现检索）。",
+        "operationId": "topics_api_v1_qa_topics_get",
+        "parameters": [
+          {
+            "name": "probe",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "试探一个问题会命中哪一组",
+              "title": "Probe"
+            },
+            "description": "试探一个问题会命中哪一组"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Topics Api V1 Qa Topics Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/qa/logs": {
+      "get": {
+        "tags": [
+          "统计"
+        ],
+        "summary": "调用记录（分页）",
+        "operationId": "logs_api_v1_qa_logs_get",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 20,
+              "title": "Page Size"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "ok / error / busy",
+              "title": "Status"
+            },
+            "description": "ok / error / busy"
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "sync / stream",
+              "title": "Mode"
+            },
+            "description": "sync / stream"
+          },
+          {
+            "name": "session_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "since_hours",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Since Hours"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseModel_PageModel_CallLogItem__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/qa/logs/{request_id}": {
+      "get": {
+        "tags": [
+          "统计"
+        ],
+        "summary": "按请求 ID 查单条记录",
+        "operationId": "log_one_api_v1_qa_logs__request_id__get",
+        "parameters": [
+          {
+            "name": "request_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "title": "Request Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseModel_CallLogItem_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/qa/stats": {
+      "get": {
+        "tags": [
+          "统计"
+        ],
+        "summary": "运营统计",
+        "description": "**调用侧**：问答次数、平均耗时、成功率、拒答率、层 D 合规率、耗时分位数与 token 花销（按 since_hours 开窗）。\n\n**知识库侧**（`index` 段）：文档总数、索引大小、增量更新次数。这一段是**启动时读一次**的快照，不随本次请求重算——现算的实测代价是 221 秒。各组件健康状态在 `GET /health/ready`。",
+        "operationId": "stats_api_v1_qa_stats_get",
+        "parameters": [
+          {
+            "name": "since_hours",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "只统计最近 N 小时；不传=全部",
+              "title": "Since Hours"
+            },
+            "description": "只统计最近 N 小时；不传=全部"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseModel_CallStats_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sessions": {
+      "post": {
+        "tags": [
+          "会话"
+        ],
+        "summary": "新建会话",
+        "operationId": "create_session_api_v1_sessions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/SessionCreateRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Req"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseModel_SessionData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "会话"
+        ],
+        "summary": "会话列表（分页）",
+        "operationId": "list_sessions_api_v1_sessions_get",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 20,
+              "title": "Page Size"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseModel_PageModel_SessionData__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sessions/{session_id}": {
+      "get": {
+        "tags": [
+          "会话"
+        ],
+        "summary": "会话详情（含历史）",
+        "operationId": "get_session_api_v1_sessions__session_id__get",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "turns",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 0,
+              "default": 20,
+              "title": "Turns"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseModel_SessionData_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "会话"
+        ],
+        "summary": "删除会话",
+        "operationId": "delete_session_api_v1_sessions__session_id__delete",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Delete Session Api V1 Sessions  Session Id  Delete"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents": {
+      "get": {
+        "tags": [
+          "文档"
+        ],
+        "summary": "文献列表（过滤 + 游标分页）",
+        "description": "按期刊 / 年份 / 标题关键词过滤，游标分页。\n\n· **没有 page 参数**：227 万行上的深翻页要扫掉前面所有行，所以只提供 `cursor`（传上一页返回的 `next_cursor`）。\n· `total` 默认不算（null），要就传 `with_total=true`：无过滤时约 24ms，配标题模糊搜最坏约 1.5s。\n· 标题搜是 `LIKE %kw%`，命中少时要全表扫，实测最坏 824ms。",
+        "operationId": "list_documents_api_v1_documents_get",
+        "parameters": [
+          {
+            "name": "journal",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "期刊全名，精确匹配",
+              "title": "Journal"
+            },
+            "description": "期刊全名，精确匹配"
+          },
+          {
+            "name": "pub_year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 2100,
+                  "minimum": 1500
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "发表年份，精确",
+              "title": "Pub Year"
+            },
+            "description": "发表年份，精确"
+          },
+          {
+            "name": "year_from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 2100,
+                  "minimum": 1500
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Year From"
+            }
+          },
+          {
+            "name": "year_to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 2100,
+                  "minimum": 1500
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Year To"
+            }
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "标题包含该关键词（大小写不敏感）",
+              "title": "Title"
+            },
+            "description": "标题包含该关键词（大小写不敏感）"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 64
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "上一页返回的 next_cursor",
+              "title": "Cursor"
+            },
+            "description": "上一页返回的 next_cursor"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "with_total",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "是否额外算总数（有代价，见上）",
+              "default": false,
+              "title": "With Total"
+            },
+            "description": "是否额外算总数（有代价，见上）"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseModel_DocumentPage_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{doc_id}": {
+      "get": {
+        "tags": [
+          "文档"
+        ],
+        "summary": "按 id 查文献",
+        "description": "`doc_id` 传 PMCID（如 `PMC212698`）；本语料里 doc_id 与 pmcid 相同，两种都认。不在目录里 → **3001**（注意：那只表示不在这份 4M 抽样索引里，不代表 PMC 上没有这篇）。",
+        "operationId": "get_document_api_v1_documents__doc_id__get",
+        "parameters": [
+          {
+            "name": "doc_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 64,
+              "description": "PMCID 或 doc_id",
+              "title": "Doc Id"
+            },
+            "description": "PMCID 或 doc_id"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseModel_DocumentIn_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AskData": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "query": {
+            "type": "string",
+            "title": "Query",
+            "description": "用户原始问题"
+          },
+          "resolved_query": {
+            "type": "string",
+            "title": "Resolved Query",
+            "description": "用于检索的问题（追问改写后；未改写时与 query 相同）",
+            "default": ""
+          },
+          "retrieval_query": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Retrieval Query",
+            "description": "真正送进检索层的那句话（中文问题在这里被译成英文）；快照模式或检索层没给出时为 null"
+          },
+          "rewritten": {
+            "type": "boolean",
+            "title": "Rewritten",
+            "default": false
+          },
+          "partial": {
+            "type": "boolean",
+            "title": "Partial",
+            "description": "部分作答：问题的一部分有证据、另一部分没有。与 refused 互斥——refused 只表示**完全**拒答",
+            "default": false
+          },
+          "history_used": {
+            "type": "integer",
+            "title": "History Used",
+            "description": "本次带入的历史轮数",
+            "default": 0
+          },
+          "answer": {
+            "type": "string",
+            "title": "Answer"
+          },
+          "refused": {
+            "type": "boolean",
+            "title": "Refused",
+            "description": "答案中出现了阶段九那句固定拒答短语",
+            "default": false
+          },
+          "retrieval_mode": {
+            "type": "string",
+            "title": "Retrieval Mode",
+            "description": "live=真实检索 / snapshot=固化快照（仅开发演示）",
+            "default": ""
+          },
+          "evidence_pool": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence Pool"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/SourceItem"
+            },
+            "type": "array",
+            "title": "Sources"
+          },
+          "citation_check": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CitationCheck"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "constraint_check": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConstraintCheck"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/GenerationMetrics"
+          },
+          "intermediate": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Intermediate"
+          }
+        },
+        "type": "object",
+        "required": [
+          "request_id",
+          "query",
+          "answer"
+        ],
+        "title": "AskData",
+        "description": "同步问答的业务数据。流式接口的 `done` 事件载荷与本模型字段一致。"
+      },
+      "AskRequest": {
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "Query",
+            "description": "用户问题，去空白后 1~1000 字符"
+          },
+          "top_k": {
+            "type": "integer",
+            "maximum": 50.0,
+            "minimum": 1.0,
+            "title": "Top K",
+            "description": "检索召回条数",
+            "default": 10
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id",
+            "description": "传入则关联历史对话：用历史把指代问题改写成独立问题，并把本轮追加进会话"
+          },
+          "history_turns": {
+            "type": "integer",
+            "maximum": 20.0,
+            "minimum": 0.0,
+            "title": "History Turns",
+            "description": "改写时回看的历史轮数（一问一答算一轮）",
+            "default": 4
+          },
+          "rewrite": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rewrite",
+            "description": "追问改写策略：none / concat / llm；缺省用服务端配置"
+          },
+          "evaluate": {
+            "type": "boolean",
+            "title": "Evaluate",
+            "description": "①证据评估段（关掉可省一次模型调用）",
+            "default": true
+          },
+          "review": {
+            "type": "boolean",
+            "title": "Review",
+            "description": "③批判审查段（关掉则用②的草稿定稿，省两次调用）",
+            "default": true
+          },
+          "constrained": {
+            "type": "boolean",
+            "title": "Constrained",
+            "description": "阶段九强约束提示层 + 生成后校验修正",
+            "default": true
+          },
+          "expect_refusal": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expect Refusal",
+            "description": "仅评测用：这道题是否应当拒答。只影响校验口径，绝不写进提示词"
+          },
+          "evidence_pool": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence Pool",
+            "description": "快照检索模式下指定证据组 id（如 live-1）；live 模式忽略"
+          },
+          "include_intermediate": {
+            "type": "boolean",
+            "title": "Include Intermediate",
+            "description": "是否返回①③的原始中间结果（体积大，默认不返回）",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "query"
+        ],
+        "title": "AskRequest",
+        "description": "问答请求。同步接口与流式接口共用同一份，两种模式的参数语义完全一致。",
+        "example": {
+          "evaluate": true,
+          "query": "CRISPR-Cas9 的脱靶效应如何检测？",
+          "review": true,
+          "top_k": 10
+        }
+      },
+      "CallLogItem": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At",
+            "default": ""
+          },
+          "path": {
+            "type": "string",
+            "title": "Path",
+            "default": ""
+          },
+          "mode": {
+            "type": "string",
+            "title": "Mode",
+            "description": "sync / stream",
+            "default": ""
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "query": {
+            "type": "string",
+            "title": "Query",
+            "default": ""
+          },
+          "top_k": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top K"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "ok / error / busy",
+            "default": ""
+          },
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "default": 0
+          },
+          "http_status": {
+            "type": "integer",
+            "title": "Http Status",
+            "default": 200
+          },
+          "elapsed_ms": {
+            "type": "number",
+            "title": "Elapsed Ms",
+            "default": 0.0
+          },
+          "llm_calls": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Llm Calls"
+          },
+          "prompt_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt Tokens"
+          },
+          "output_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output Tokens"
+          },
+          "answer_chars": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Answer Chars"
+          },
+          "refused": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Refused"
+          },
+          "compliant": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Compliant"
+          },
+          "error": {
+            "type": "string",
+            "title": "Error",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "request_id"
+        ],
+        "title": "CallLogItem"
+      },
+      "CallStats": {
+        "properties": {
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "default": 0
+          },
+          "by_status": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "By Status"
+          },
+          "by_code": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "By Code"
+          },
+          "by_mode": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "By Mode"
+          },
+          "success_rate": {
+            "type": "number",
+            "title": "Success Rate",
+            "default": 0.0
+          },
+          "refusal_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Refusal Rate",
+            "description": "成功请求中拒答的比例"
+          },
+          "compliant_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Compliant Rate"
+          },
+          "elapsed_ms": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Elapsed Ms",
+            "description": "avg/p50/p95/max"
+          },
+          "tokens": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Tokens"
+          },
+          "window": {
+            "type": "string",
+            "title": "Window",
+            "default": ""
+          },
+          "index": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/IndexStatsData"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "知识库规模（文档总数 / 索引大小 / 增量更新次数）。调用量统计随请求变，这一段只随重建索引变，所以启动时读一次即可"
+          }
+        },
+        "type": "object",
+        "title": "CallStats",
+        "description": "给后续统计用的聚合。分位数在 Python 侧算——这个量级下没必要为它上时序库。"
+      },
+      "CitationCheck": {
+        "properties": {
+          "used": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Used"
+          },
+          "available": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Available"
+          },
+          "fabricated": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Fabricated",
+            "description": "编造的编号，正常为空"
+          },
+          "has_citation": {
+            "type": "boolean",
+            "title": "Has Citation",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "CitationCheck"
+      },
+      "ComponentHealth": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "ok": {
+            "type": "boolean",
+            "title": "Ok"
+          },
+          "critical": {
+            "type": "boolean",
+            "title": "Critical",
+            "default": true
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "default": ""
+          },
+          "latency_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latency Ms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "ok"
+        ],
+        "title": "ComponentHealth"
+      },
+      "ConstraintCheck": {
+        "properties": {
+          "compliant": {
+            "type": "boolean",
+            "title": "Compliant",
+            "default": false
+          },
+          "violations": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Violations"
+          },
+          "scores": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Scores"
+          },
+          "repaired": {
+            "type": "boolean",
+            "title": "Repaired",
+            "description": "是否发生过修正",
+            "default": false
+          },
+          "repair_rounds": {
+            "type": "integer",
+            "title": "Repair Rounds",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "ConstraintCheck",
+        "description": "阶段九层 D 的判定结果（`constrained=False` 时为 null）。"
+      },
+      "DocumentIn": {
+        "properties": {
+          "doc_id": {
+            "type": "string",
+            "title": "Doc Id",
+            "description": "文档 ID。本语料里等于 pmcid（distinct 只差 17）"
+          },
+          "pmcid": {
+            "type": "string",
+            "title": "Pmcid",
+            "description": "PMC 号，唯一主键"
+          },
+          "pmid": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pmid",
+            "description": "PubMed 号；**不唯一**（勘误与原文共用），不能拿来当主键"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "description": "文献标题（库内字段名 source_title）",
+            "default": ""
+          },
+          "journal": {
+            "type": "string",
+            "title": "Journal",
+            "default": ""
+          },
+          "pub_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pub Year",
+            "description": "发表年份。任务书写的是 pub_date，但语料只保留到年份"
+          },
+          "abstract": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abstract",
+            "description": "摘要正文，由库内 section=abstract 的块拼回；**仅 7.7% 的文献有**，其余为 null"
+          },
+          "total_chunks": {
+            "type": "integer",
+            "title": "Total Chunks",
+            "description": "原文切块数（切块阶段记的，平均 28.6）",
+            "default": 0
+          },
+          "indexed_chunks": {
+            "type": "integer",
+            "title": "Indexed Chunks",
+            "description": "真正进了 4M 向量库的块数（平均 1.76）",
+            "default": 0
+          },
+          "sections": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Sections",
+            "description": "本篇在库内出现过的规范段落名"
+          }
+        },
+        "type": "object",
+        "required": [
+          "doc_id",
+          "pmcid"
+        ],
+        "title": "DocumentIn",
+        "description": "文献模型。**名字照任务书写的 `DocumentIn`**，不另起一个更\"像响应模型\"的名字，\n免得对照任务书时多一层翻译。\n\n与任务书字段清单的三处出入，都是语料决定的，不是省事：\n\n· **`pub_date` → `pub_year`**：切块阶段只保留了年份，库里 10 个元数据字段\n  （doc_id/chunk_index/total_chunks/source_title/token_count/section/pmcid/pmid/\n  journal/pub_year）里没有完整日期。放一个恒为 null 的 `pub_date` 只会让人以为\n  是数据缺失而去查。\n· **`abstract` 只有 7.7% 有值**（2,274,167 篇里 175,664 篇）。4M 索引是按**块**\n  抽样的，多数文献的摘要块根本没被抽中。字段保留（任务书点名了）但标可选，\n  填充率写在这里而不是等人自己发现。\n· **`total_chunks` 与 `indexed_chunks` 必须并列**：前者是原文切块数（平均 28.6），\n  后者是真正进了 4M 库的条数（平均 1.76）。只给前者，详情页会显示\"共 26 块\"\n  然后一块也列不出来。",
+        "example": {
+          "doc_id": "PMC212698",
+          "indexed_chunks": 2,
+          "journal": "PLoS Biology",
+          "pmcid": "PMC212698",
+          "pmid": "14551916",
+          "pub_year": 2003,
+          "sections": [
+            "results",
+            "methods"
+          ],
+          "title": "Candidate Gene Association Study in Type 2 Diabetes…",
+          "total_chunks": 36
+        }
+      },
+      "DocumentPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentIn"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "default": 20
+          },
+          "has_more": {
+            "type": "boolean",
+            "title": "Has More",
+            "default": false
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor",
+            "description": "下一页的 cursor；没有下一页时为 null"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total",
+            "description": "只在 with_total=true 时计算，否则为 null"
+          },
+          "filters": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Filters",
+            "description": "本次真正生效的过滤条件"
+          },
+          "elapsed_ms": {
+            "type": "number",
+            "title": "Elapsed Ms",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "title": "DocumentPage",
+        "description": "文献列表结果。**用游标不用页码**——`PageModel` 那套 `page/offset` 在 227 万行上\n会掉进翻页深渊（`LIMIT 20 OFFSET 100000` 得先扫掉前十万行）。游标是上一页最后一条\n的 pmcid，翻到第几页都是常数代价。\n\n`total` 默认为 null：无过滤时 `COUNT(*)` 实测 24ms、最坏（标题全表扫）1.5s，\n而翻页并不需要它。要就显式传 `with_total=true`。"
+      },
+      "GenerationMetrics": {
+        "properties": {
+          "total_time_seconds": {
+            "type": "number",
+            "title": "Total Time Seconds",
+            "default": 0.0
+          },
+          "llm_calls": {
+            "type": "integer",
+            "title": "Llm Calls",
+            "default": 0
+          },
+          "total_prompt_tokens": {
+            "type": "integer",
+            "title": "Total Prompt Tokens",
+            "default": 0
+          },
+          "total_output_tokens": {
+            "type": "integer",
+            "title": "Total Output Tokens",
+            "default": 0
+          },
+          "context_tokens": {
+            "type": "integer",
+            "title": "Context Tokens",
+            "default": 0
+          },
+          "answer_chars": {
+            "type": "integer",
+            "title": "Answer Chars",
+            "default": 0
+          },
+          "stage_times": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Stage Times"
+          },
+          "stage_success": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Stage Success"
+          },
+          "chain": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Chain"
+          }
+        },
+        "type": "object",
+        "title": "GenerationMetrics"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthData": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "ok / degraded / down"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "default": ""
+          },
+          "uptime_seconds": {
+            "type": "number",
+            "title": "Uptime Seconds",
+            "default": 0.0
+          },
+          "retrieval_mode": {
+            "type": "string",
+            "title": "Retrieval Mode",
+            "default": ""
+          },
+          "model": {
+            "type": "string",
+            "title": "Model",
+            "default": ""
+          },
+          "pipeline_loaded": {
+            "type": "boolean",
+            "title": "Pipeline Loaded",
+            "default": false
+          },
+          "in_flight": {
+            "type": "integer",
+            "title": "In Flight",
+            "default": 0
+          },
+          "max_concurrent": {
+            "type": "integer",
+            "title": "Max Concurrent",
+            "default": 0
+          },
+          "components": {
+            "items": {
+              "$ref": "#/components/schemas/ComponentHealth"
+            },
+            "type": "array",
+            "title": "Components"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "HealthData"
+      },
+      "IndexStatsData": {
+        "properties": {
+          "available": {
+            "type": "boolean",
+            "title": "Available",
+            "description": "index_stats.json 是否可用；false 时下面全为 null",
+            "default": false
+          },
+          "total_documents": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Documents",
+            "description": "库内文献数（去重 pmcid）。⚠ 口径是**被抽中至少一块**的文献数——4M 索引按块抽样，不等于这么多篇完整文献在库里，见 documents_note"
+          },
+          "total_chunks": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Chunks",
+            "description": "库内文本块数"
+          },
+          "documents_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Documents Note"
+          },
+          "index_size_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Index Size Bytes",
+            "description": "向量库 + BM25 + 文献目录的占盘"
+          },
+          "index_size_human": {
+            "type": "string",
+            "title": "Index Size Human",
+            "default": ""
+          },
+          "index_size_detail": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Index Size Detail"
+          },
+          "incremental_updates": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Incremental Updates",
+            "description": "增量更新次数。当前语料是冻结快照、一次全量构建，如实为 0"
+          },
+          "incremental_updates_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Incremental Updates Note"
+          },
+          "last_index_built_at": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Index Built At",
+            "description": "⚠ 有三个建库时间（向量库 / BM25 / 文献目录），不是一个"
+          },
+          "corpus_snapshot": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Corpus Snapshot"
+          },
+          "computed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Computed At",
+            "description": "这份统计算于何时（不是查询时间）"
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "IndexStatsData",
+        "description": "知识库侧的规模统计。**全部来自启动时读的 `data/index_stats.json`，请求路径零计算。**\n\n为什么不现算（都是实测的）：Chroma sqlite 上 `count(distinct pmcid)` 要 **221.2 秒**，\n`count(*)` 要 25.2 秒，`col.get(where=…)` 首次要 22 秒且把进程 RSS 顶到 13.68 GB。\n把这些放进 `/qa/stats`，一个毫秒级接口会掉到秒级甚至分钟级。\n\n⚠ **文件缺失时各计数是 `null` 不是 `0`**：0 是个看起来正常的假数字，\nnull 才能让人看出\"这个数还没算\"。`available=false` 时看 `detail` 里的原因。"
+      },
+      "PageModel_CallLogItem_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CallLogItem"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total",
+            "description": "满足条件的总条数（不是本页条数）",
+            "default": 0
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Page",
+            "default": 1
+          },
+          "page_size": {
+            "type": "integer",
+            "maximum": 200.0,
+            "minimum": 1.0,
+            "title": "Page Size",
+            "default": 20
+          },
+          "pages": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Pages",
+            "description": "总页数；total=0 时为 0，不是 1",
+            "default": 0
+          },
+          "has_next": {
+            "type": "boolean",
+            "title": "Has Next",
+            "default": false
+          },
+          "has_prev": {
+            "type": "boolean",
+            "title": "Has Prev",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "PageModel[CallLogItem]"
+      },
+      "PageModel_SessionData_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SessionData"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total",
+            "description": "满足条件的总条数（不是本页条数）",
+            "default": 0
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Page",
+            "default": 1
+          },
+          "page_size": {
+            "type": "integer",
+            "maximum": 200.0,
+            "minimum": 1.0,
+            "title": "Page Size",
+            "default": 20
+          },
+          "pages": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Pages",
+            "description": "总页数；total=0 时为 0，不是 1",
+            "default": 0
+          },
+          "has_next": {
+            "type": "boolean",
+            "title": "Has Next",
+            "default": false
+          },
+          "has_prev": {
+            "type": "boolean",
+            "title": "Has Prev",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "PageModel[SessionData]"
+      },
+      "ResponseModel_AskData_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "description": "业务错误码，0 表示成功；码表见 GET /api/v1/errors",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "给人看的一句话说明",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AskData"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时的业务数据；失败时为 null"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail",
+            "description": "失败时的结构化补充信息"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id",
+            "description": "本次请求的唯一 ID，与日志、SQLite 记录一一对应",
+            "default": ""
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          },
+          "elapsed_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Elapsed Ms",
+            "description": "服务端处理耗时（毫秒）"
+          }
+        },
+        "type": "object",
+        "title": "ResponseModel[AskData]",
+        "example": {
+          "code": 0,
+          "data": {},
+          "elapsed_ms": 12.3,
+          "message": "ok",
+          "request_id": "req-1a2b3c4d",
+          "timestamp": "2026-08-10 12:00:00"
+        }
+      },
+      "ResponseModel_CallLogItem_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "description": "业务错误码，0 表示成功；码表见 GET /api/v1/errors",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "给人看的一句话说明",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CallLogItem"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时的业务数据；失败时为 null"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail",
+            "description": "失败时的结构化补充信息"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id",
+            "description": "本次请求的唯一 ID，与日志、SQLite 记录一一对应",
+            "default": ""
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          },
+          "elapsed_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Elapsed Ms",
+            "description": "服务端处理耗时（毫秒）"
+          }
+        },
+        "type": "object",
+        "title": "ResponseModel[CallLogItem]",
+        "example": {
+          "code": 0,
+          "data": {},
+          "elapsed_ms": 12.3,
+          "message": "ok",
+          "request_id": "req-1a2b3c4d",
+          "timestamp": "2026-08-10 12:00:00"
+        }
+      },
+      "ResponseModel_CallStats_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "description": "业务错误码，0 表示成功；码表见 GET /api/v1/errors",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "给人看的一句话说明",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CallStats"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时的业务数据；失败时为 null"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail",
+            "description": "失败时的结构化补充信息"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id",
+            "description": "本次请求的唯一 ID，与日志、SQLite 记录一一对应",
+            "default": ""
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          },
+          "elapsed_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Elapsed Ms",
+            "description": "服务端处理耗时（毫秒）"
+          }
+        },
+        "type": "object",
+        "title": "ResponseModel[CallStats]",
+        "example": {
+          "code": 0,
+          "data": {},
+          "elapsed_ms": 12.3,
+          "message": "ok",
+          "request_id": "req-1a2b3c4d",
+          "timestamp": "2026-08-10 12:00:00"
+        }
+      },
+      "ResponseModel_DocumentIn_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "description": "业务错误码，0 表示成功；码表见 GET /api/v1/errors",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "给人看的一句话说明",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DocumentIn"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时的业务数据；失败时为 null"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail",
+            "description": "失败时的结构化补充信息"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id",
+            "description": "本次请求的唯一 ID，与日志、SQLite 记录一一对应",
+            "default": ""
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          },
+          "elapsed_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Elapsed Ms",
+            "description": "服务端处理耗时（毫秒）"
+          }
+        },
+        "type": "object",
+        "title": "ResponseModel[DocumentIn]",
+        "example": {
+          "code": 0,
+          "data": {},
+          "elapsed_ms": 12.3,
+          "message": "ok",
+          "request_id": "req-1a2b3c4d",
+          "timestamp": "2026-08-10 12:00:00"
+        }
+      },
+      "ResponseModel_DocumentPage_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "description": "业务错误码，0 表示成功；码表见 GET /api/v1/errors",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "给人看的一句话说明",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DocumentPage"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时的业务数据；失败时为 null"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail",
+            "description": "失败时的结构化补充信息"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id",
+            "description": "本次请求的唯一 ID，与日志、SQLite 记录一一对应",
+            "default": ""
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          },
+          "elapsed_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Elapsed Ms",
+            "description": "服务端处理耗时（毫秒）"
+          }
+        },
+        "type": "object",
+        "title": "ResponseModel[DocumentPage]",
+        "example": {
+          "code": 0,
+          "data": {},
+          "elapsed_ms": 12.3,
+          "message": "ok",
+          "request_id": "req-1a2b3c4d",
+          "timestamp": "2026-08-10 12:00:00"
+        }
+      },
+      "ResponseModel_HealthData_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "description": "业务错误码，0 表示成功；码表见 GET /api/v1/errors",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "给人看的一句话说明",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HealthData"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时的业务数据；失败时为 null"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail",
+            "description": "失败时的结构化补充信息"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id",
+            "description": "本次请求的唯一 ID，与日志、SQLite 记录一一对应",
+            "default": ""
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          },
+          "elapsed_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Elapsed Ms",
+            "description": "服务端处理耗时（毫秒）"
+          }
+        },
+        "type": "object",
+        "title": "ResponseModel[HealthData]",
+        "example": {
+          "code": 0,
+          "data": {},
+          "elapsed_ms": 12.3,
+          "message": "ok",
+          "request_id": "req-1a2b3c4d",
+          "timestamp": "2026-08-10 12:00:00"
+        }
+      },
+      "ResponseModel_PageModel_CallLogItem__": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "description": "业务错误码，0 表示成功；码表见 GET /api/v1/errors",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "给人看的一句话说明",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PageModel_CallLogItem_"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时的业务数据；失败时为 null"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail",
+            "description": "失败时的结构化补充信息"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id",
+            "description": "本次请求的唯一 ID，与日志、SQLite 记录一一对应",
+            "default": ""
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          },
+          "elapsed_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Elapsed Ms",
+            "description": "服务端处理耗时（毫秒）"
+          }
+        },
+        "type": "object",
+        "title": "ResponseModel[PageModel[CallLogItem]]",
+        "example": {
+          "code": 0,
+          "data": {},
+          "elapsed_ms": 12.3,
+          "message": "ok",
+          "request_id": "req-1a2b3c4d",
+          "timestamp": "2026-08-10 12:00:00"
+        }
+      },
+      "ResponseModel_PageModel_SessionData__": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "description": "业务错误码，0 表示成功；码表见 GET /api/v1/errors",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "给人看的一句话说明",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PageModel_SessionData_"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时的业务数据；失败时为 null"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail",
+            "description": "失败时的结构化补充信息"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id",
+            "description": "本次请求的唯一 ID，与日志、SQLite 记录一一对应",
+            "default": ""
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          },
+          "elapsed_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Elapsed Ms",
+            "description": "服务端处理耗时（毫秒）"
+          }
+        },
+        "type": "object",
+        "title": "ResponseModel[PageModel[SessionData]]",
+        "example": {
+          "code": 0,
+          "data": {},
+          "elapsed_ms": 12.3,
+          "message": "ok",
+          "request_id": "req-1a2b3c4d",
+          "timestamp": "2026-08-10 12:00:00"
+        }
+      },
+      "ResponseModel_SessionData_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "description": "业务错误码，0 表示成功；码表见 GET /api/v1/errors",
+            "default": 0
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "给人看的一句话说明",
+            "default": "ok"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SessionData"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "成功时的业务数据；失败时为 null"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail",
+            "description": "失败时的结构化补充信息"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id",
+            "description": "本次请求的唯一 ID，与日志、SQLite 记录一一对应",
+            "default": ""
+          },
+          "timestamp": {
+            "type": "string",
+            "title": "Timestamp"
+          },
+          "elapsed_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Elapsed Ms",
+            "description": "服务端处理耗时（毫秒）"
+          }
+        },
+        "type": "object",
+        "title": "ResponseModel[SessionData]",
+        "example": {
+          "code": 0,
+          "data": {},
+          "elapsed_ms": 12.3,
+          "message": "ok",
+          "request_id": "req-1a2b3c4d",
+          "timestamp": "2026-08-10 12:00:00"
+        }
+      },
+      "SessionCreateRequest": {
+        "properties": {
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id",
+            "description": "不传则服务端生成"
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "title": "Title",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "SessionCreateRequest"
+      },
+      "SessionData": {
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "title": "Session Id"
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At",
+            "default": ""
+          },
+          "updated_at": {
+            "type": "string",
+            "title": "Updated At",
+            "default": ""
+          },
+          "turns": {
+            "type": "integer",
+            "title": "Turns",
+            "default": 0
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "default": ""
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/SessionTurn"
+            },
+            "type": "array",
+            "title": "History"
+          }
+        },
+        "type": "object",
+        "required": [
+          "session_id"
+        ],
+        "title": "SessionData"
+      },
+      "SessionTurn": {
+        "properties": {
+          "turn_index": {
+            "type": "integer",
+            "title": "Turn Index"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role",
+            "description": "user / assistant"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id",
+            "default": ""
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "turn_index",
+          "role",
+          "content"
+        ],
+        "title": "SessionTurn"
+      },
+      "SourceItem": {
+        "properties": {
+          "marker": {
+            "type": "string",
+            "title": "Marker"
+          },
+          "pmcid": {
+            "type": "string",
+            "title": "Pmcid",
+            "default": ""
+          },
+          "pmid": {
+            "type": "string",
+            "title": "Pmid",
+            "default": ""
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "default": ""
+          },
+          "journal": {
+            "type": "string",
+            "title": "Journal",
+            "default": ""
+          },
+          "pub_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pub Year"
+          },
+          "section": {
+            "type": "string",
+            "title": "Section",
+            "default": ""
+          },
+          "chunk_id": {
+            "type": "string",
+            "title": "Chunk Id",
+            "default": ""
+          },
+          "relevance_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Relevance Score"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "marker"
+        ],
+        "title": "SourceItem",
+        "description": "一条可溯源的出处。`marker` 就是答案正文里的 [S#]。"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

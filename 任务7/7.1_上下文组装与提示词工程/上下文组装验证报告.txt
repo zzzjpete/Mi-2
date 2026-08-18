@@ -1,0 +1,124 @@
+================================================================================================
+上下文组装器 + 医学提示词模板 · 验证
+================================================================================================
+真实语料：E:\rag\任务3\样例_文本块_1000.jsonl 共 1000 条文本块
+
+================================================================================================
+A. 分词器 —— 与 qwen3:8b 同一套 BPE（从 Ollama GGUF 重建）
+================================================================================================
+  [PASS] Qwen3 分词器可离线加载 — 来源=cache vocab=151,936 ctx=40960 用时 0.39s
+  [PASS] 词表规模与 Qwen3 一致（151,936） — 实际 151,936
+  [PASS] 1000 条真实文本块 encode→decode 往返一致 — 不一致 0 条
+  [PASS] token 计数全为正整数 — min=1 max=783 中位=430
+  [PASS] 空串计为 0 token
+  [PASS] 计数单调（文本变长不会变少） — 前 200 条 text vs text+text
+    实测 chars/token：min 1.31 | p5 3.05 | 中位 4.49 | 均值 4.41 | max 6.50
+  [PASS] truncate_to_tokens 结果不超上限（精确模式） — 超限 0/300
+  [PASS] 降级字符启发式：≥90% 的真实块被高估（偏保守） — 高估比例 96.2%，h/e 中位 1.50，最差 0.44
+  [PASS] truncate_to_tokens 结果不超上限（启发式模式） — 超限 0/300
+  [PASS] 组装器 estimate_tokens 与分词器一致 — 前 200 条逐条比对
+
+================================================================================================
+B. 去重 —— Jaccard 相似性
+================================================================================================
+  [PASS] 自相似度 = 1.0 — 1.0000
+  [PASS] 不同正文相似度低于去重阈值 — sim=0.0026 < 阈值 0.8
+  [PASS] 3-gram 比词袋更能区分'同词不同序' — 3-gram 0.000 < 词袋 1.000
+  [PASS] 完全重复被丢弃 — 保留 ['c1', 'c4']，丢弃 ['c3', 'c2']
+  [PASS] 保留的是重复簇里相关性最高的那条 — c1(rel=0.90) 保留，c2(rel=0.50) 丢弃
+  [PASS] 近重复（Jaccard 0.889 ≥ 0.8）被丢弃 — c3 已丢弃
+  [PASS] 无关正文未被误删
+  [PASS] 过短的退化块被前置丢弃（正文不足 20 字符） — 丢弃 8 条，样例正文 ['xx']
+  [PASS] 真实语料上去重零误删（被丢的都是逐字重复） — 1000 条中保留 992，丢弃 0 条（均为逐字重复），误删 0 条
+
+================================================================================================
+C. 排序与来源多样性
+================================================================================================
+  [PASS] 关掉多样性时严格按相关性降序选取 — 9 条，序列 [0.9, 0.89, 0.88, 0.87, 0.86]…
+  [PASS] 同源硬上限 max_per_source=3 生效 — 来源分布 {'PMC_A': 3, 'PMC_B': 3, 'PMC_C': 1}
+  [PASS] 多样性让低相关的其它文献进入上下文 — 覆盖 3 篇文献：{'PMC_A': 3, 'PMC_B': 3, 'PMC_C': 1}
+  [PASS] 同源第 4 条被排到别的文献之后（软惩罚生效） — B#0 位次 1 < A#3 位次 未入选
+  [PASS] 有效分公式 = 相关性 × decay^同源已选数 — 手算 0.506250 vs 实现 0.506250（误差 0.0e+00）
+
+================================================================================================
+D. token 预算与截断
+================================================================================================
+  [PASS] 各预算下上下文都不超预算 — 预算200→150tok/2块(截断0) | 预算500→481tok/5块(截断1) | 预算1200→1097tok/6块(截断0) | 预算2800→2740tok/10块(截断0)
+  [PASS] 预算越大装的证据越多（单调不减） — 2 → 5 → 6 → 10
+  [PASS] metadata.estimated_tokens 与 context_text 实测一致 — 1097 tok
+  [PASS] 被截断的正文都以完整句/段结尾（或末10%内确无边界） — 共触发截断 544 次，越界 0 次
+  [PASS] 截断结果是原文前缀（未改写内容） — 非前缀 0 次
+  [PASS] 回退查找不超出末 10% 窗口 — 超窗 0 次（窗口比例 10%）
+  [PASS] 不会把 e.g. / et al. 的缩写点当句末 — 10 次主动选边界，误切 0 次
+  [PASS] 回退窗口内跳过更靠后的缩写点、退到真句末 — 结尾 …'erall survival at 24 months.'
+  [PASS] 预算极小时安全退化（空上下文、不异常） — 入选 0 块，因预算跳过 60 块
+  [PASS] 大块装不下时跳过它继续装小块（而非直接停止） — 入选 ['small']，跳过 ['big']
+
+================================================================================================
+E. 元数据与引用可溯源性
+================================================================================================
+  [PASS] 任务书要求的 5 个元数据字段齐全 — 缺失 []
+  [PASS] 计数自洽：selected ≤ unique ≤ retrieved — 60 → 60 → 6
+  [PASS] total_chunks_retrieved 等于输入条数 — 60 vs 输入 60
+  [PASS] chunk_sources 计数与入选块自洽 — 4 篇文献 / 6 块，最多同源 2
+  [PASS] [S#] 标记连续、唯一、与入选块数一致 — 上下文中 6 个标记，期望 6 个
+  [PASS] citations 与 selected_chunks 逐条对应 — 6 条引用记录
+  [PASS] 引用里的 pmcid/期刊/年份与块元数据一致
+  [PASS] 每条证据的出处头出现在上下文里（模型可见）
+  [PASS] 参考文献列表与引用编号一一对应 — 6 条
+
+================================================================================================
+F. 医学提示词模板
+================================================================================================
+  [PASS] 四段提示词齐全 — evidence_evaluator=证据评估器 / answer_generator=答案生成器 / critical_reviewer=批判性审查器 / final_assembler=最终组装器
+  [PASS] 温度与 max_tokens 取值合法 — evidence_evaluator:T=0.0,N=1200 | answer_generator:T=0.3,N=1500 | critical_reviewer:T=0.0,N=1200 | final_assembler:T=0.2,N=2000
+  [PASS] 结构化输出的两段温度为 0（可复现、便于解析）
+  [PASS] 模板变量自动推导正确 — evidence_evaluator:['question', 'context'] | answer_generator:['question', 'context', 'evidence_summary'] | critical_reviewer:['question', 'context', 'draft_answer'] | final_assembler:['question', 'context', 'draft_answer', 'review', 'reference_list']
+  [PASS] 缺少模板变量时报错（不静默留占位符）
+  [PASS] JSON 示例中的花括号不被误替换 — schema: {"marker": "S1", "relevance": 3} 问题：X
+  [PASS] 渲染出的 messages 形状正确 — ['system', 'user']
+  [PASS] 证据上下文确实进入了 user 提示词 — user 长度 5079 字符
+  [PASS] 未渲染的 {变量} 占位符已全部消失
+  [PASS] 关闭思考模式时附加 /no_think
+  [PASS] 采样参数映射到 Ollama 键名（max_tokens→num_predict） — {"temperature": 0.3, "num_predict": 1500, "top_p": 0.9}
+  [PASS] 链路开关可做消融（关掉评估/审查即退化为直接作答） — ['answer_generator', 'final_assembler']
+    num_ctx=8192   → 证据预算  2312 tok（最坏段 final_assembler，链内输入预留 2700，文献列表预留 600）
+    num_ctx=12288  → 证据预算  6408 tok（最坏段 final_assembler，链内输入预留 2700，文献列表预留 600）
+    num_ctx=16384  → 证据预算 10504 tok（最坏段 final_assembler，链内输入预留 2700，文献列表预留 600）
+  [PASS] 建议 num_ctx=12288 下的证据预算 ≥ 组装器默认预算 — 建议 6408 tok（最吃上下文的一段：final_assembler），组装器默认 2800 tok
+  [PASS] num_ctx=8192 下证据预算仍为正（可降级运行，需调小组装器预算） — 2312 tok < 默认 2800，此时须显式传 max_context_tokens
+  [PASS] 最坏一段（默认预算证据 + 满载草稿/审查 + 最长输出）仍在 num_ctx=12288 内 — 输入 6468（含证据 2740） + 输出上限 2000 = 8468 ≤ 12288
+
+================================================================================================
+H. 与 Ollama 实测对照 —— 分词是否真的一致 / num_ctx 与显存
+================================================================================================
+  [PASS] 本地重建的分词与 Ollama 实际分词逐条一致 — 9 个样本（2~1143 tok）差值集合 [0]
+  [PASS] Ollama 默认 num_ctx = 4096（必须显式调大，否则四段链被静默截断） — 实测 4096
+  [PASS] num_ctx=12288 时显存占用留有余量（10GB 卡） — 实测 size_vram 6.33 GB（context_length=12288）
+
+================================================================================================
+G. 端到端冒烟 —— 真实检索结果 → 上下文组装
+================================================================================================
+[流水线] 初始化查询理解处理器 ...
+[流水线] 打开 Chroma 集合 medrag_bge_base @ E:\rag\data\chroma_db_4m ...
+[流水线] 加载嵌入模型 bge-base ...
+[模型] 加载 BAAI/bge-base-en-v1.5 (dim=768) 到 cuda ...
+[流水线] mmap 载入 BM25 索引 @ E:\rag\data\bm25_index_4m ...
+[重排] 加载 BAAI/bge-reranker-base 到 cuda ...
+[流水线] 就绪：Chroma 3,998,000 向量 | BM25 3,998,000 篇
+
+[加载完成] 用时 30s
+    [上下文] 检索 10 → 去重后 10 → 入选 5（5 篇文献） | 2670/2800 tokens | 截断 1 条
+  [PASS] 真实 Candidate 可直接转成 DocumentChunk — 检索 10 → 入选 5
+  [PASS] 真实结果的相关性取自重排总分 — relevance_score == rerank_score
+  [PASS] 真实上下文不超预算 — 2670/2800 tok
+  [PASS] 真实证据来自多篇文献 — 5 篇：['PMC9425065', 'PMC8403352', 'PMC10464425', 'PMC9623244', 'PMC8185359']
+
+--- 真实上下文（前 1200 字符）---
+[S1] PMC9425065 · Frontiers in Oncology (2022) · Methods · "Efficacy of immune checkpoint inhibitors in non-small cell lung cancer: A systematic review and meta-analysis"
+Methods The study was registered with PROSPERO (CRD42019123892), an international prospective register of systematic reviews, and performed following the Preferred Reporting Items for Systematic Reviews and Meta-analyses (PRISMA) guidelines ( 14 ). The need for institutional review board approval was waived by Drum Tower Hospital because this meta-analysis utilized publicly available data. Study selection and data extraction We performed a systematic literature search using PubMed, Web of Science, Embase, and Scopus for phase 2/3 randomized controlled trials (RCTs) from database inception to August 31, 2021. Two investigators (FY and YW) independently searched the databases. Any disagreement was resolved by discussion and consensus. We performed full-text reviews if abstracts were insufficient for determining if the studies met the inclusion criteria. We set the search criteria to include all the PD-1 inhibitors (nivolumab, pembrolizumab, cemiplimab, toripalimab, sintilimab, camrelizumab, tislelizumab, penpulimab,
+
+================================================================================================
+总计 65/65 项通过    用时 88.8s
+================================================================================================
+报告已写入 E:\rag\report_data\生成_上下文组装验证报告.txt

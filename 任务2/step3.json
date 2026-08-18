@@ -1,0 +1,42 @@
+{
+  "distribution": {
+    "n": 3028,
+    "min": 64,
+    "max": 27704,
+    "mean": 6298,
+    "std": 4066,
+    "p25": 3487,
+    "median": 5631,
+    "p75": 8404,
+    "p90": 11498,
+    "p95": 14079,
+    "p99": 19482
+  },
+  "within_pct": {
+    "512": 0.8,
+    "768": 2.1,
+    "1024": 6.2,
+    "2048": 14.0,
+    "4096": 32.3,
+    "8192": 73.7
+  },
+  "over_512_pct": 99.24,
+  "chunk_estimate": {
+    "512/64": {
+      "total_chunks": 43637,
+      "mean_per_doc": 14.4,
+      "max_per_doc": 62
+    },
+    "384/64": {
+      "total_chunks": 60520,
+      "mean_per_doc": 20.0,
+      "max_per_doc": 87
+    },
+    "256/32": {
+      "total_chunks": 86233,
+      "mean_per_doc": 28.5,
+      "max_per_doc": 124
+    }
+  },
+  "img": "E:\\rag\\report_data\\token_hist.png"
+}

@@ -1,0 +1,120 @@
+[模型] 加载 BAAI/bge-base-en-v1.5 (dim=768) 到 cuda ...
+
+======================================================================
+① 基础统计验证
+======================================================================
+  向量数量：3,998,000
+  样本1 id=PMC212698#15  meta={'pmcid': 'PMC212698', 'journal': 'PLoS Biology', 'pub_year': 2003, 'section': 'Results/Discussion', 'token_count': 453}
+  样本2 id=PMC212698#32  meta={'pmcid': 'PMC212698', 'journal': 'PLoS Biology', 'pub_year': 2003, 'section': 'Materials and Methods', 'token_count': 481}
+  样本3 id=PMC212699#12  meta={'pmcid': 'PMC212699', 'journal': 'PLoS Biology', 'pub_year': 2003, 'section': 'Results', 'token_count': 439}
+  向量维度：768
+
+======================================================================
+② 相似性检索验证（从索引摘文本作查询，测自相似性）
+======================================================================
+  PMC212698#15: 自身命中排名=1 (top1 sim=0.984) ✓
+  PMC212698#32: 自身命中排名=1 (top1 sim=0.975) ✓
+  PMC212699#12: 自身命中排名=1 (top1 sim=0.988) ✓
+  PMC261870#4: 自身命中排名=1 (top1 sim=0.988) ✓
+  PMC314470#0: 自身命中排名=1 (top1 sim=0.982) ✓
+  → 自身排第1：5/5（查询加指令前缀属非对称检索，排名靠前即正常）
+
+======================================================================
+③ 边界情况验证
+======================================================================
+  空查询：返回 3 条（未报错，向量仍可算）
+  超长查询(17200字符)：返回 3 条（截断到512 token，未报错）
+
+======================================================================
+④ 产出验收 A：真实医学问题检索返回相关片段
+======================================================================
+
+  Q: What is the mechanism of action of metformin in type 2 diabetes?
+    [1] sim=0.785  PMC7764076#19
+        PMC7764076 · Pharmaceuticals 2020 · 5. Mechanisms Whereby Metformin Reduces Hyperglycaemia
+        《Metformin Protects against Podocyte Injury in Diabetic Kidney Disease》
+        5. Mechanisms Whereby Metformin Reduces Hyperglycaemia Metformin has various mechanisms of action via which it reduces hyperglycaemia. It has become evident …
+    [2] sim=0.765  PMC5354934#0
+        PMC5354934 · Oncotarget 2017 · Abstract
+        《Anti-tumor activity of metformin: from metabolic and epigenetic perspe》
+        Metformin has been used to treat type 2 diabetes for over 50 years. Epidemiological, preclinical and clinical studies suggest that metformin treatment reduces …
+    [3] sim=0.761  PMC10452592#1
+        PMC10452592 · Biomedicines 2023 · 1. Introduction
+        《Pharmacometabolomic Approach to Investigate the Response to Metformin 》
+        1. Introduction Metformin constitutes the foundation therapy in type 2 diabetes due to its multiple positive effects; it is still the most commonly prescribed …
+
+  Q: How does CRISPR-Cas9 achieve targeted genome editing?
+    [1] sim=0.772  PMC6401152#0
+        PMC6401152 · Scientific Reports 2019 · Abstract
+        《Unexpected genomic rearrangements at targeted loci associated with CRI》
+        The CRISPR/Cas9 gene editing tool enables accessible and efficient modifications which (re)ignited molecular research in certain species. However, targeted …
+    [2] sim=0.755  PMC9931768#1
+        PMC9931768 · Scientific Reports 2023 · Introduction
+        《CRISPR/Cas9-mediated targeted knock-in of large constructs using nocod》
+        Introduction Implementation of the CRISPR (clustered regularly interspaced short palindromic repeats)/Cas9 (CRISPR-associated protein 9) nuclease system has …
+    [3] sim=0.752  PMC6775113#1
+        PMC6775113 · Scientific Reports 2019 · Introduction
+        《Time origin and structural analysis of the induced CRISPR/cas9 megabas》
+        Introduction CRISPR/Cas9 (the clustered regularly interspaced repeat associated protein 9) technology is the most attractive approach to perform predictable …
+
+  Q: What causes cytokine storm in severe infections?
+    [1] sim=0.773  PMC8258165#15
+        PMC8258165 · Frontiers in Microbiology 2021 · Cytokine Storm Caused by Acute Viral Infection
+        《Acute Infection of Viral Pathogens and Their Innate Immune Escape》
+        Cytokine Storm Caused by Acute Viral Infection Optimal activation of innate immunity in the course of viral infection is very important for viral clearance. …
+    [2] sim=0.769  PMC9842031#35
+        PMC9842031 · Bioengineering & Translational Medicine 2023 · DISCUSSION
+        《Baicalein self‐microemulsion based on drug–phospholipid complex for th》
+        12 The occurrence of cytokine storm is not only a significant clinical feature of septicemia, but also an important cause of the systemic inflammatory …
+    [3] sim=0.759  PMC8320726#32
+        PMC8320726 · Frontiers in Immunology 2021 · Strategies to Prevent Fatality Based on Mechanistic Signatures of Immunopathogenesis
+        《Immunopathogenesis of Different Emerging Viral Infections: Evasion, Fa》
+        Targeting Cytokine Storm by Immunotherapies Certain emerging infections can cause altered immunity which results in the release of untoward cytokines causing …
+
+  Q: Role of tumor microenvironment in cancer immunotherapy
+    [1] sim=0.842  PMC8945019#11
+        PMC8945019 · Biomedicines 2022 · 3. The Tumor Microenvironment
+        《Immunosuppressive Signaling Pathways as Targeted Cancer Therapies》
+        3. The Tumor Microenvironment The tumor microenvironment consists of a diverse population of nonmalignant cells/components, including immune cells, …
+    [2] sim=0.832  PMC8227424#10
+        PMC8227424 · International Journal of Molecular Sciences 2021 · 4. Tumor Microenvironment
+        《4-1BBL as a Mediator of Cross-Talk between Innate, Adaptive, and Regul》
+        4. Tumor Microenvironment Tumor microenvironment regulation has a key role in the success of antitumor therapies. Composed of proliferating tumor cells, tumor …
+    [3] sim=0.828  PMC9271663#1
+        PMC9271663 · Frontiers in Immunology 2022 · 1 Introduction
+        《Development of Immunotherapy Strategies Targeting Tumor Microenvironme》
+        1 Introduction The tumor immune microenvironment (TIME) is a very complex system that is influenced by a wide range of factors; in this microenvironment, …
+
+======================================================================
+⑤ 产出验收 B：元数据过滤功能
+======================================================================
+  Q: gene expression analysis using microarray
+  · 不过滤（top3）:
+    [1] sim=0.804  PMC2822851#1
+        PMC2822851 · PLoS ONE 2010 · Introduction
+        《Atlas of Signaling for Interpretation of Microarray Experiments》
+        Introduction Microarray-based expression profiling of living systems is a quick and inexpensive method to obtain insights into the nature of various diseases …
+    [2] sim=0.801  PMC3044315#2
+        PMC3044315 · BMC Bioinformatics 2011 · Background
+        《Multi-resolution independent component analysis for high-performance t》
+        Background With the rapid developments in genomics, high-throughput microarray pattern analysis shows a great potential in cancer diagnosis for its efficiency …
+    [3] sim=0.794  PMC8566472#1
+        PMC8566472 · Scientific Reports 2021 · Introduction
+        《Band-based similarity indices for gene expression classification and c》
+        Introduction Quantification of gene expression data has become a benchmark in biomedical research for the study of numerous diseases. High-throughput …
+  · 过滤 pub_year >= 2020（top3）:
+    [1] sim=0.794  PMC8566472#1
+        PMC8566472 · Scientific Reports 2021 · Introduction
+        《Band-based similarity indices for gene expression classification and c》
+        Introduction Quantification of gene expression data has become a benchmark in biomedical research for the study of numerous diseases. High-throughput …
+    [2] sim=0.793  PMC8707311#20
+        PMC8707311 · International Journal of Molecular Sciences 2021 · 4. Materials and Methods
+        《Gene Expression Data Mining Reveals the Involvement of GPR55 and Its E》
+        4. Materials and Methods 4.1. Software Gene expression data mining was conducted using Genevestigator 8.0.2 (Nebion AG, Zurich, Switzerland) [ 65 ]. The data …
+    [3] sim=0.781  PMC7969809#1
+        PMC7969809 · Frontiers in Genetics 2021 · 1. Introduction
+        《Selecting Classification Methods for Small Samples of Next-Generation 》
+        1. Introduction RNA sequencing (RNA-seq), which involves directly sequencing complementary DNAs and aligning the sequences to the reference genome or …
+  · 过滤后命中年份：[2021, 2022, 2023] -> 全部 >=2020: True
+
+[验证完成]
